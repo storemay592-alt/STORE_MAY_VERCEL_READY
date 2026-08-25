@@ -1,0 +1,14 @@
+.env
+.env.*
+!.env.example
+.next
+node_modules
+outputs
+.impeccable
+*.log
+*.tsbuildinfo
+preview-*.png
+AGENTS.md
+CLAUDE.md
+PRODUCT.md
+DESIGN.md

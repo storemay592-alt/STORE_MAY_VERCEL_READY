@@ -1,0 +1,25 @@
+# Store MAY
+
+Store MAY es una tienda y showroom multimarca de ropa, calzado, bolsos y accesorios 100% originales para mujeres, hombres y niños.
+
+## Categorías
+Las categorías Mujeres, Hombres, Niños y Accesorios se presentan y filtran en la página principal: /#categorias
+
+## Productos publicados
+- Nike Cortez 23 Premium Black: /hombres/calzado/nike-cortez-23-premium-black
+- Adidas Crossbody Utility Black: /hombres/bolsos/adidas-crossbody-utility-black
+- Adidas Handbag White Edition: /mujeres/bolsos/adidas-handbag-white-edition
+- Adidas Crossbody Utility White: /mujeres/bolsos/adidas-crossbody-utility-white
+- Puma Roma 24 Standard Black: /ninos/calzado/puma-roma-24-standard-black
+- Adidas Gorra Adjustable Malla Black: /accesorios/gorras/adidas-gorra-adjustable-malla-black
+
+## Información comercial
+- Los productos se presentan como 100% originales.
+- Los precios, las tallas y la disponibilidad se confirman mediante atención personalizada.
+- La cobertura, el costo y los tiempos de envío dependen del destino y se informan antes de confirmar la compra.
+- Las condiciones de cambios y devoluciones se comunican antes de la compra según el producto.
+
+## Recursos para indexación
+- Sitemap: /sitemap.xml
+- Robots: /robots.txt
+- Preguntas frecuentes: /#preguntas-frecuentes
