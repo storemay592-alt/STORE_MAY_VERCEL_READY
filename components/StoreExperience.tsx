@@ -318,32 +318,35 @@ export default function StoreExperience() {
           </div>
           <span className="advisor-showcase-light" aria-hidden="true" />
           <div className="section-shell advisor-showcase-layout">
-            <aside className="advisor-showcase-panel">
-              <div className="advisor-copy">
-                <p>Precios y pagos</p>
-                <h2 id="advisor-title">Pregunta antes de elegir.</h2>
-                <p>
-                  Comunícate con nosotros. Aceptamos pagos en efectivo, transferencias bancarias,
-                  previa confirmación de disponibilidad.
-                </p>
+            <h2 className="sr-only" id="advisor-title">
+              Precios, pagos y atención personalizada de Store MAY
+            </h2>
+            <div className="advisor-phone-stage">
+              <div className="advisor-phone-frame">
+                <Image
+                  className="advisor-phone-image"
+                  src="/images/store-may-advisor-phone.jpg"
+                  alt="Store MAY: precios y pagos, pregunta antes de elegir y consulta disponibilidad"
+                  fill
+                  sizes="(max-width: 520px) 84vw, (max-width: 800px) 68vw, 430px"
+                  quality={95}
+                  priority={false}
+                />
+                <span className="advisor-phone-sheen" aria-hidden="true" />
               </div>
-            </aside>
-            <a
-              className="whatsapp-button advisor-whatsapp-button"
-              href={whatsappHref}
-              target="_blank"
-              rel="noreferrer"
-              aria-label="Comunícate con nosotros por WhatsApp"
-            >
-              <span className="purchase-icon-bevel" aria-hidden="true">
-                <WhatsAppIcon />
-              </span>
-              <span className="whatsapp-button-label">
-                <small>WhatsApp</small>
-                <strong>Comunícate con nosotros</strong>
-              </span>
-              <i aria-hidden="true">→</i>
-            </a>
+              <a
+                className="advisor-whatsapp-orb"
+                href={whatsappHref}
+                target="_blank"
+                rel="noreferrer"
+                aria-label="Abrir WhatsApp para consultar precios y disponibilidad"
+              >
+                <span aria-hidden="true">
+                  <WhatsAppIcon />
+                </span>
+                <span className="sr-only">WhatsApp</span>
+              </a>
+            </div>
             <output
               className="visitor-corner"
               aria-live="polite"

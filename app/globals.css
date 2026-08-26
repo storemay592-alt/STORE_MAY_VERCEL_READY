@@ -2864,9 +2864,11 @@ button {
   z-index: -2;
   inset: 0;
   background:
-    radial-gradient(circle at 50% 45%, oklch(0.92 0.018 292 / 0.1), transparent 30%),
-    linear-gradient(90deg, oklch(0.035 0.006 285 / 0.08) 0 56%, oklch(0.025 0.004 250 / 0.76) 82% 100%),
-    linear-gradient(180deg, oklch(0.02 0.005 285 / 0.12), transparent 36% 72%, oklch(0.018 0.003 250 / 0.52));
+    radial-gradient(ellipse at 50% 24%, rgb(255 255 255 / 0.16), transparent 26%),
+    radial-gradient(ellipse at 52% 44%, oklch(0.77 0.035 285 / 0.16), transparent 38%),
+    radial-gradient(ellipse at 18% 70%, oklch(0.45 0.045 238 / 0.13), transparent 42%),
+    linear-gradient(90deg, oklch(0.025 0.005 285 / 0.28), transparent 24% 72%, oklch(0.018 0.003 250 / 0.72)),
+    linear-gradient(180deg, oklch(0.015 0.004 285 / 0.06), transparent 35% 70%, oklch(0.012 0.003 250 / 0.58));
   pointer-events: none;
 }
 
@@ -3014,6 +3016,213 @@ button {
 
 .advisor-whatsapp-button i {
   font-size: 0.95rem;
+}
+
+.advisor-phone-stage {
+  position: absolute;
+  top: clamp(72px, 6.2vw, 104px);
+  left: 50%;
+  z-index: 5;
+  width: min(430px, 31vw);
+  aspect-ratio: 1008 / 1043;
+  perspective: 1400px;
+  transform: translateX(-50%);
+  transform-style: preserve-3d;
+}
+
+.advisor-phone-stage::before {
+  position: absolute;
+  z-index: -1;
+  inset: 7% -13% -8%;
+  border-radius: 42%;
+  background:
+    radial-gradient(ellipse at 50% 34%, rgb(255 255 255 / 0.2), transparent 40%),
+    radial-gradient(ellipse at 50% 64%, oklch(0.66 0.055 278 / 0.17), transparent 62%);
+  filter: blur(30px);
+  content: "";
+  opacity: 0.94;
+  pointer-events: none;
+}
+
+.advisor-phone-frame {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  isolation: isolate;
+  overflow: hidden;
+  border: 1px solid oklch(0.94 0.008 255 / 0.46);
+  border-radius: clamp(28px, 2.5vw, 40px);
+  background:
+    linear-gradient(145deg, oklch(0.24 0.009 260 / 0.58), oklch(0.04 0.006 255 / 0.86));
+  box-shadow:
+    0 42px 86px oklch(0.005 0.002 260 / 0.72),
+    0 14px 28px oklch(0.005 0.002 260 / 0.55),
+    -12px -12px 34px oklch(0.92 0.015 270 / 0.12),
+    inset 1px 1px 0 oklch(0.99 0.004 250 / 0.52),
+    inset -3px -4px 10px oklch(0.005 0.002 260 / 0.72);
+  backdrop-filter: blur(26px) saturate(1.16);
+  transform: rotateX(0.8deg) rotateY(-1.5deg) translateZ(0);
+  transform-origin: 50% 58%;
+  transition:
+    transform 620ms cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 620ms cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 320ms ease;
+}
+
+.advisor-phone-frame::before {
+  position: absolute;
+  z-index: 3;
+  inset: 10px;
+  border: 1px solid oklch(0.98 0.004 250 / 0.18);
+  border-radius: calc(clamp(28px, 2.5vw, 40px) - 9px);
+  box-shadow:
+    inset 0 1px 0 oklch(0.99 0.003 250 / 0.16),
+    inset 0 -1px 0 oklch(0.02 0.003 260 / 0.7);
+  content: "";
+  pointer-events: none;
+}
+
+.advisor-phone-frame::after {
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+  background:
+    linear-gradient(118deg, rgb(255 255 255 / 0.16), transparent 21% 67%, rgb(255 255 255 / 0.04)),
+    linear-gradient(180deg, rgb(255 255 255 / 0.08), transparent 18% 78%, rgb(0 0 0 / 0.18));
+  content: "";
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+.advisor-phone-image {
+  z-index: 1;
+  object-fit: cover;
+  object-position: center;
+  filter: contrast(1.08) brightness(1.06) saturate(0.9);
+  transform: scale(1.008);
+  transition: transform 900ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.advisor-phone-sheen {
+  position: absolute;
+  z-index: 2;
+  inset: -30% 40% -30% -60%;
+  background: linear-gradient(108deg, transparent 36%, rgb(255 255 255 / 0.12) 48%, transparent 60%);
+  pointer-events: none;
+  transform: translateX(-35%);
+  transition: transform 950ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.advisor-phone-stage:hover .advisor-phone-frame,
+.advisor-phone-stage:focus-within .advisor-phone-frame {
+  border-color: oklch(0.98 0.004 250 / 0.64);
+  box-shadow:
+    0 50px 98px oklch(0.005 0.002 260 / 0.78),
+    0 18px 34px oklch(0.005 0.002 260 / 0.62),
+    -16px -15px 40px oklch(0.92 0.015 270 / 0.16),
+    inset 1px 1px 0 oklch(0.99 0.004 250 / 0.62),
+    inset -3px -4px 10px oklch(0.005 0.002 260 / 0.76);
+  transform: translateY(-7px) rotateX(1.2deg) rotateY(-2.4deg) translateZ(18px);
+}
+
+.advisor-phone-stage:hover .advisor-phone-image,
+.advisor-phone-stage:focus-within .advisor-phone-image {
+  transform: scale(1.026);
+}
+
+.advisor-phone-stage:hover .advisor-phone-sheen,
+.advisor-phone-stage:focus-within .advisor-phone-sheen {
+  transform: translateX(135%);
+}
+
+.advisor-whatsapp-orb {
+  position: absolute;
+  right: -34px;
+  bottom: clamp(26px, 3vw, 44px);
+  z-index: 8;
+  width: clamp(66px, 5.2vw, 78px);
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  border: 1px solid oklch(0.92 0.008 250 / 0.42);
+  border-radius: 30%;
+  background:
+    radial-gradient(circle at 32% 25%, oklch(0.58 0.012 250 / 0.54), transparent 26%),
+    linear-gradient(145deg, oklch(0.25 0.01 255 / 0.94), oklch(0.055 0.006 255 / 0.96) 72%);
+  color: #25d366;
+  box-shadow:
+    0 22px 38px rgb(0 0 0 / 0.66),
+    0 0 0 8px rgb(8 10 13 / 0.28),
+    -7px -7px 18px rgb(255 255 255 / 0.13),
+    inset 2px 2px 2px rgb(255 255 255 / 0.24),
+    inset -5px -6px 10px rgb(0 0 0 / 0.7);
+  backdrop-filter: blur(20px) saturate(1.2);
+  transition:
+    transform 360ms cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 360ms cubic-bezier(0.16, 1, 0.3, 1),
+    color 260ms ease;
+}
+
+.advisor-whatsapp-orb::before {
+  position: absolute;
+  inset: 8px;
+  border: 1px solid rgb(255 255 255 / 0.16);
+  border-radius: 27%;
+  box-shadow: inset 0 0 16px rgb(255 255 255 / 0.04);
+  content: "";
+  pointer-events: none;
+}
+
+.advisor-whatsapp-orb::after {
+  position: absolute;
+  inset: 18%;
+  border-radius: 50%;
+  background: rgb(37 211 102 / 0.12);
+  box-shadow: 0 0 24px rgb(37 211 102 / 0.22);
+  content: "";
+  filter: blur(7px);
+  pointer-events: none;
+}
+
+.advisor-whatsapp-orb > span:first-child {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+}
+
+.advisor-whatsapp-orb svg {
+  width: clamp(28px, 2.25vw, 34px);
+  height: clamp(28px, 2.25vw, 34px);
+  fill: currentColor;
+  filter: drop-shadow(0 0 8px rgb(37 211 102 / 0.32));
+}
+
+.advisor-whatsapp-orb:hover,
+.advisor-whatsapp-orb:focus-visible {
+  color: #45ed83;
+  box-shadow:
+    0 28px 48px rgb(0 0 0 / 0.72),
+    0 0 0 8px rgb(9 11 14 / 0.34),
+    0 0 30px rgb(37 211 102 / 0.2),
+    -8px -8px 21px rgb(255 255 255 / 0.17),
+    inset 2px 2px 2px rgb(255 255 255 / 0.3),
+    inset -5px -6px 10px rgb(0 0 0 / 0.72);
+  outline: none;
+  transform: translateY(-5px) rotate(-2deg) scale(1.045);
+}
+
+.advisor-whatsapp-orb:focus-visible {
+  outline: 2px solid rgb(255 255 255 / 0.86);
+  outline-offset: 7px;
+}
+
+.advisor-whatsapp-orb:active {
+  box-shadow:
+    0 9px 18px rgb(0 0 0 / 0.54),
+    inset 5px 6px 12px rgb(0 0 0 / 0.58),
+    inset -2px -2px 6px rgb(255 255 255 / 0.12);
+  transform: translateY(1px) scale(0.98);
 }
 
 .visitor-corner {
@@ -4095,8 +4304,9 @@ button {
 
   .advisor-showcase-light {
     background:
-      radial-gradient(circle at 50% 34%, oklch(0.9 0.012 292 / 0.08), transparent 28%),
-      linear-gradient(180deg, oklch(0.03 0.004 250 / 0.12), transparent 55%, oklch(0.02 0.003 250 / 0.48));
+      radial-gradient(ellipse at 50% 24%, rgb(255 255 255 / 0.14), transparent 27%),
+      radial-gradient(ellipse at 50% 42%, oklch(0.7 0.04 282 / 0.14), transparent 42%),
+      linear-gradient(180deg, oklch(0.03 0.004 250 / 0.1), transparent 54%, oklch(0.018 0.003 250 / 0.52));
   }
 
   .advisor-showcase-layout {
@@ -4121,6 +4331,16 @@ button {
     bottom: 72px;
     width: 220px;
     margin: 0;
+  }
+
+  .advisor-phone-stage {
+    top: 56px;
+    width: min(430px, 70vw);
+  }
+
+  .advisor-whatsapp-orb {
+    right: -24px;
+    bottom: 28px;
   }
 }
 
@@ -4185,6 +4405,27 @@ button {
 
   .advisor-whatsapp-button .whatsapp-button-label strong {
     font-size: 0.56rem;
+  }
+
+  .advisor-phone-stage {
+    top: 46px;
+    width: min(340px, calc(100% - 66px));
+  }
+
+  .advisor-phone-frame {
+    border-radius: 28px;
+  }
+
+  .advisor-whatsapp-orb {
+    right: -14px;
+    bottom: 24px;
+    width: 60px;
+    border-radius: 18px;
+  }
+
+  .advisor-whatsapp-orb::before {
+    inset: 7px;
+    border-radius: 13px;
   }
 }
 
