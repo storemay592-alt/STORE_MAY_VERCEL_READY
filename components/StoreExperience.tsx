@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-import { AdaptiveSpline } from "@/components/AdaptiveSpline";
 import { PremiumHeader } from "@/components/PremiumHeader";
 import { faqs } from "@/data/faqs";
 import { categories } from "@/lib/catalog";
@@ -286,7 +285,8 @@ export default function StoreExperience() {
                         alt={setIndex === 0 ? `Logo de ${brand.name}` : ""}
                         width={brand.width}
                         height={brand.height}
-                        quality={82}
+                        quality={100}
+                        unoptimized
                         draggable={false}
                       />
                     </span>
@@ -299,24 +299,25 @@ export default function StoreExperience() {
             <h2 className="sr-only" id="authenticity-title">
               Marcas premium, precios inteligentes y productos 100% originales
             </h2>
-            <AdaptiveSpline
-              className="spline-experience"
-              frameClassName="spline-experience-frame"
-              src="https://my.spline.design/ticktockinteractivelanding-nb2Si9kAK23qhl7VmMKts2zt/"
-              title="Experiencia interactiva 100% original de Store MAY"
-              posterSrc="/images/store-may-satin-background.webp"
-              posterAlt="Escenario oscuro satinado de Store MAY"
-              allow="autoplay; fullscreen; xr-spatial-tracking"
-              sandbox="allow-scripts allow-same-origin allow-pointer-lock allow-presentation"
-              referrerPolicy="strict-origin-when-cross-origin"
-            />
+            <div className="spline-experience">
+              <iframe
+                src="https://my.spline.design/ticktockinteractivelanding-nb2Si9kAK23qhl7VmMKts2zt/"
+                title="Experiencia interactiva 100% original de Store MAY"
+                loading="lazy"
+                allow="autoplay; fullscreen; xr-spatial-tracking"
+                allowFullScreen
+                sandbox="allow-scripts allow-same-origin allow-pointer-lock allow-presentation"
+                tabIndex={-1}
+                referrerPolicy="strict-origin-when-cross-origin"
+              />
+            </div>
             <div className="premium-pricing-mark">
               <Image
                 src="/images/store-may-premium-pricing.png"
                 alt="Marcas premium, precios inteligentes"
                 width={1178}
                 height={57}
-                quality={84}
+                unoptimized
               />
             </div>
           </section>
@@ -356,16 +357,16 @@ export default function StoreExperience() {
           id="contacto"
           aria-label="Experiencia interactiva Store MAY"
         >
-          <AdaptiveSpline
-            className="advisor-spline-stage"
-            frameClassName="advisor-spline-viewer"
-            src="/spline-stage"
-            title="Objeto 3D interactivo de Store MAY"
-            posterSrc="/images/advisor-satin-background.webp"
-            posterAlt="Escenario satinado oscuro del asesor Store MAY"
-            allow="fullscreen; xr-spatial-tracking"
-            referrerPolicy="same-origin"
-          />
+          <div className="advisor-spline-stage">
+            <iframe
+              className="advisor-spline-viewer"
+              src="/spline-stage"
+              title="Objeto 3D interactivo de Store MAY"
+              loading="eager"
+              allow="fullscreen; xr-spatial-tracking"
+              referrerPolicy="same-origin"
+            />
+          </div>
           <a
             className="advisor-whatsapp-button"
             href={storeWhatsappHref}
