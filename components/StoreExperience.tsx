@@ -236,7 +236,7 @@ export default function StoreExperience() {
               src="/video/store-may-0826-desktop.webm"
               type="video/webm"
             />
-            <source src="/video/store-may-0826-desktop.mp4" type="video/mp4" />
+            <source src="/video/store-may-0826-web.mp4" type="video/mp4" />
             Tu navegador no admite la reproducción de video.
           </video>
           <span className="hero-video-wash" aria-hidden="true" />
