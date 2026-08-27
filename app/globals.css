@@ -5146,6 +5146,18 @@ button {
     background-position: 60% center;
   }
 
+  /* The Spline scene has a fixed internal composition (it doesn't reflow
+     its own text/layout for narrow viewports). Giving the iframe a
+     comfortably wide, fixed pixel width and centering it lets Spline
+     render "100% ORIGINAL" without clipping the text itself; only the
+     decorative margins on either side get cropped by the section's
+     overflow:hidden, evenly on both sides. */
+  .spline-experience iframe {
+    left: 50%;
+    width: 640px;
+    transform: translateX(-50%);
+  }
+
   .premium-pricing-mark {
     bottom: 20px;
     width: min(86vw, 520px);
