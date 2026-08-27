@@ -310,6 +310,10 @@ export default function StoreExperience() {
                 tabIndex={-1}
                 referrerPolicy="strict-origin-when-cross-origin"
               />
+              <div className="spline-experience-fallback" aria-hidden="true">
+                <span>100%</span>
+                <strong>Original</strong>
+              </div>
             </div>
             <div className="premium-pricing-mark">
               <Image
