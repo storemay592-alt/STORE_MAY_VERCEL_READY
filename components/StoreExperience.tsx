@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
+import { AdaptiveSpline } from "@/components/AdaptiveSpline";
 import { PremiumHeader } from "@/components/PremiumHeader";
 import { faqs } from "@/data/faqs";
 import { categories } from "@/lib/catalog";
@@ -118,27 +119,56 @@ const storeWhatsappHref = `https://api.whatsapp.com/send?text=${encodeURICompone
 export default function StoreExperience() {
   const [openFaq, setOpenFaq] = useState(0);
   const [heroSoundEnabled, setHeroSoundEnabled] = useState(false);
+  const heroRef = useRef<HTMLElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const heroSoundEnabledRef = useRef(false);
 
   useEffect(() => {
     const video = videoRef.current;
-    if (!video) return;
+    const hero = heroRef.current;
+    if (!video || !hero) return;
+
+    const device = navigator as Navigator & {
+      connection?: { saveData?: boolean; effectiveType?: string };
+    };
+    const connection = device.connection;
+    const conserveData =
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
+      Boolean(connection?.saveData) ||
+      connection?.effectiveType === "slow-2g" ||
+      connection?.effectiveType === "2g";
+    let heroVisible = true;
+
+    if (conserveData) video.pause();
 
     const startVideo = () => {
+      if (!heroVisible || document.hidden || (conserveData && !heroSoundEnabledRef.current)) return;
       video.muted = !heroSoundEnabledRef.current;
       video.play().catch(() => undefined);
     };
 
     const resumeWhenVisible = () => {
       if (!document.hidden) startVideo();
+      else video.pause();
     };
 
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        heroVisible = entry.isIntersecting;
+        if (heroVisible) startVideo();
+        else video.pause();
+      },
+      { threshold: 0.08 }
+    );
+
     startVideo();
+    observer.observe(hero);
     video.addEventListener("canplay", startVideo);
     document.addEventListener("visibilitychange", resumeWhenVisible);
 
     return () => {
+      observer.disconnect();
+      video.pause();
       video.removeEventListener("canplay", startVideo);
       document.removeEventListener("visibilitychange", resumeWhenVisible);
     };
@@ -166,10 +196,26 @@ export default function StoreExperience() {
       <PremiumHeader />
 
       <main id="contenido">
-        <section className="hero" id="inicio" aria-label="Presentación de Store MAY">
+        <section
+          ref={heroRef}
+          className="hero"
+          id="inicio"
+          aria-label="Presentación de Store MAY"
+        >
           <h1 className="sr-only">
             Store MAY: ropa, calzado y accesorios de marcas 100% originales
           </h1>
+          <picture className="hero-poster" aria-hidden="true">
+            <source
+              media="(max-width: 900px) and (orientation: portrait)"
+              srcSet="/video/store-may-0826-mobile-poster.webp"
+            />
+            <img
+              src="/video/store-may-0826-desktop-poster.webp"
+              alt=""
+              fetchPriority="high"
+            />
+          </picture>
           <video
             ref={videoRef}
             className="hero-video"
@@ -177,14 +223,21 @@ export default function StoreExperience() {
             muted={!heroSoundEnabled}
             loop
             playsInline
-            preload="auto"
-            poster="/video/store-may-poster-white-line.png"
+            preload="metadata"
+            disablePictureInPicture
             aria-label="Presentación audiovisual de Store MAY"
           >
             <source
-              src="/video/store-may-0826-web.mp4"
+              media="(max-width: 900px) and (orientation: portrait)"
+              src="/video/store-may-0826-mobile.mp4"
               type="video/mp4"
             />
+            <source
+              media="(min-width: 768px)"
+              src="/video/store-may-0826-desktop.webm"
+              type="video/webm"
+            />
+            <source src="/video/store-may-0826-desktop.mp4" type="video/mp4" />
             Tu navegador no admite la reproducción de video.
           </video>
           <span className="hero-video-wash" aria-hidden="true" />
@@ -233,8 +286,7 @@ export default function StoreExperience() {
                         alt={setIndex === 0 ? `Logo de ${brand.name}` : ""}
                         width={brand.width}
                         height={brand.height}
-                        quality={100}
-                        unoptimized
+                        quality={82}
                         draggable={false}
                       />
                     </span>
@@ -247,25 +299,24 @@ export default function StoreExperience() {
             <h2 className="sr-only" id="authenticity-title">
               Marcas premium, precios inteligentes y productos 100% originales
             </h2>
-            <div className="spline-experience">
-              <iframe
-                src="https://my.spline.design/ticktockinteractivelanding-nb2Si9kAK23qhl7VmMKts2zt/"
-                title="Experiencia interactiva 100% original de Store MAY"
-                loading="lazy"
-                allow="autoplay; fullscreen; xr-spatial-tracking"
-                allowFullScreen
-                sandbox="allow-scripts allow-same-origin allow-pointer-lock allow-presentation"
-                tabIndex={-1}
-                referrerPolicy="strict-origin-when-cross-origin"
-              />
-            </div>
+            <AdaptiveSpline
+              className="spline-experience"
+              frameClassName="spline-experience-frame"
+              src="https://my.spline.design/ticktockinteractivelanding-nb2Si9kAK23qhl7VmMKts2zt/"
+              title="Experiencia interactiva 100% original de Store MAY"
+              posterSrc="/images/store-may-satin-background.webp"
+              posterAlt="Escenario oscuro satinado de Store MAY"
+              allow="autoplay; fullscreen; xr-spatial-tracking"
+              sandbox="allow-scripts allow-same-origin allow-pointer-lock allow-presentation"
+              referrerPolicy="strict-origin-when-cross-origin"
+            />
             <div className="premium-pricing-mark">
               <Image
                 src="/images/store-may-premium-pricing.png"
                 alt="Marcas premium, precios inteligentes"
                 width={1178}
                 height={57}
-                unoptimized
+                quality={84}
               />
             </div>
           </section>
@@ -305,16 +356,16 @@ export default function StoreExperience() {
           id="contacto"
           aria-label="Experiencia interactiva Store MAY"
         >
-          <div className="advisor-spline-stage">
-            <iframe
-              className="advisor-spline-viewer"
-              src="/spline-stage"
-              title="Objeto 3D interactivo de Store MAY"
-              loading="eager"
-              allow="fullscreen; xr-spatial-tracking"
-              referrerPolicy="same-origin"
-            />
-          </div>
+          <AdaptiveSpline
+            className="advisor-spline-stage"
+            frameClassName="advisor-spline-viewer"
+            src="/spline-stage"
+            title="Objeto 3D interactivo de Store MAY"
+            posterSrc="/images/advisor-satin-background.webp"
+            posterAlt="Escenario satinado oscuro del asesor Store MAY"
+            allow="fullscreen; xr-spatial-tracking"
+            referrerPolicy="same-origin"
+          />
           <a
             className="advisor-whatsapp-button"
             href={storeWhatsappHref}
