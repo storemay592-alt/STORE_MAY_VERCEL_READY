@@ -362,7 +362,7 @@ export default function StoreExperience() {
               className="advisor-spline-viewer"
               src="/spline-stage"
               title="Objeto 3D interactivo de Store MAY"
-              loading="eager"
+              loading="lazy"
               allow="fullscreen; xr-spatial-tracking"
               referrerPolicy="same-origin"
             />
