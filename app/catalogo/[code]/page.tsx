@@ -75,10 +75,18 @@ export default async function CatalogProductPage({ params }: { params: Promise<{
             </dl>
             <WhatsAppConsultButton productId={product.id} href={whatsappHref} disabled={product.status === "agotado"} />
             <p className="catalog-detail-note">La compra se coordina por WhatsApp. No se realizan pagos dentro de esta página.</p>
+            <p className="catalog-detail-note"><Link href="/politicas-compra#tabla-de-tallas">Consultar políticas de compra y tabla de tallas →</Link></p>
           </section>
         </div>
       </main>
-      <footer className="catalog-footer"><span>© {new Date().getFullYear()} Store MAY</span><Link href="/catalogo">Volver al catálogo</Link></footer>
+      <footer className="catalog-footer">
+        <span>© {new Date().getFullYear()} Store MAY</span>
+        <nav aria-label="Información del producto">
+          <Link href="/politicas-compra">Políticas de compra y tallas</Link>
+          <Link href="/privacidad-cookies">Privacidad y cookies</Link>
+          <Link href="/catalogo">Volver al catálogo</Link>
+        </nav>
+      </footer>
     </div>
   );
 }

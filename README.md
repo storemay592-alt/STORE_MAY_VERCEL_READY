@@ -2,6 +2,12 @@
 
 Tienda multimarca construida con Next.js, TypeScript, Neon PostgreSQL e ImageKit.
 
+## Inicio automático en Windows
+
+Ejecuta `start-store-may.cmd`. El script instala las dependencias si faltan, verifica TypeScript, compila la aplicación, inicia el servidor en el puerto 4174 y abre el navegador automáticamente.
+
+`index.html` es un acceso de compatibilidad generado por `npm run release:index`; al abrirlo redirige a la URL definida en `NEXT_PUBLIC_SITE_URL` o al servidor local. La aplicación real no es un sitio estático: el punto de entrada es `app/page.tsx` y requiere un hosting compatible con Next.js porque el catálogo, el dashboard, Neon y las rutas API se ejecutan en servidor. **GitHub Pages no es suficiente**; usa GitHub como repositorio y Vercel como hosting.
+
 ## Configuración privada
 
 Copia `.env.example` como `.env.local` y completa, sin subir el archivo al repositorio:
@@ -63,6 +69,12 @@ npm run build
 npm start
 ```
 
+Para preparar una entrega completa y generar de nuevo `index.html`:
+
+```bash
+npm run release:prepare
+```
+
 Antes de publicar, valida los secretos, HTTPS y TLS de Neon:
 
 ```bash
@@ -70,6 +82,17 @@ npm run security:check
 ```
 
 La guía completa de endurecimiento del dominio, SSL, DNSSEC, WAF, backups y cuentas externas está en [`SECURITY.md`](./SECURITY.md).
+La configuración de DNS, correo anti-phishing, CAA, SPF, DKIM, DMARC y Search Console está en [`DNS-SECURITY.md`](./DNS-SECURITY.md).
+
+## Subir a GitHub
+
+1. Crea un repositorio **privado** vacío.
+2. Sube todo el contenido de esta carpeta excepto los archivos ignorados por `.gitignore`.
+3. En GitHub activa **Dependabot alerts**, **Secret scanning / Push protection**, **Private vulnerability reporting** y las reglas de protección de la rama principal.
+4. Importa el repositorio en Vercel y agrega las variables de `.env.example` usando valores reales en el gestor cifrado de Vercel.
+5. Ejecuta las migraciones y crea el usuario administrador desde una computadora segura. No subas `.env.local` ni certificados.
+
+El repositorio incluye verificaciones automáticas de compilación, auditoría de dependencias, TypeScript, Dependabot y CodeQL.
 
 Para publicar específicamente en Vercel, sigue [`VERCEL-DEPLOY.md`](./VERCEL-DEPLOY.md).
 Las cargas de imágenes del dashboard van directamente a ImageKit con autorización temporal,

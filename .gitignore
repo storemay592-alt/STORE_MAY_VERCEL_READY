@@ -5,3 +5,13 @@ node_modules/
 .env.*.local
 *.log
 *.tsbuildinfo
+
+.vercel
+.env*
+!.env.example
+
+# Archivos locales y material de entrega que no deben publicarse
+certificates/
+outputs/
+preview-*.png
+*.zip

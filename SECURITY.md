@@ -2,9 +2,14 @@
 
 Ninguna aplicación conectada a Internet puede prometerse como “inviolable”. Store MAY aplica defensa en profundidad para reducir la superficie de ataque, bloquear abusos comunes, limitar el impacto de una credencial comprometida y conservar evidencia de los accesos administrativos.
 
+## Reportar una vulnerabilidad
+
+No publiques claves, capturas del panel ni detalles explotables en un issue público. Utiliza el canal de contacto indicado en `/.well-known/security.txt`. En GitHub, habilita **Private vulnerability reporting** para recibir reportes de forma privada.
+
 ## Controles implementados en la aplicación
 
 - CSP estricta con nonce diferente por respuesta, `frame-ancestors 'none'`, `object-src 'none'`, `base-uri 'self'` y restricción de scripts, imágenes, fuentes, conexiones e iframes.
+- Validación del host público: en producción, las visitas se normalizan al dominio canónico y las escrituras enviadas a un dominio alternativo se rechazan.
 - Cabeceras contra MIME sniffing, clickjacking, filtración de referente y acceso innecesario a cámara, micrófono, ubicación, pagos y USB.
 - Redirección permanente a HTTPS en producción y HSTS durante un año. No se habilita `includeSubDomains` hasta confirmar que todos los subdominios usan HTTPS.
 - Panel administrativo excluido de cachés y buscadores.
@@ -18,6 +23,12 @@ Ninguna aplicación conectada a Internet puede prometerse como “inviolable”.
 - Consultas SQL parametrizadas y validación de todos los campos con esquemas cerrados.
 - Conexión a Neon obligatoriamente cifrada con `sslmode=require` o `sslmode=verify-full` en producción.
 - Dependencias de producción auditadas con `npm audit`.
+- Dependencias fijadas en el manifiesto y lockfile, Dependabot semanal, compilación automática y análisis CodeQL en GitHub.
+- Archivo público `/.well-known/security.txt` para reportes responsables.
+
+## Cookies y almacenamiento
+
+La navegación pública no instala cookies publicitarias ni cookies propias de analítica. Las fichas usan `sessionStorage` únicamente para no duplicar una vista dentro de la misma pestaña. La única cookie propia es la sesión técnica del panel privado y está protegida con `HttpOnly`, `Secure` en producción, `SameSite=Strict`, prefijo `__Host-` y expiración de cuatro horas. Consulta `/privacidad-cookies`.
 
 ## Configuración obligatoria antes de publicar
 
@@ -41,6 +52,10 @@ Estos controles no se pueden activar desde el código; requieren acceso al prove
 - WAF con reglas administradas, protección DDoS/bots y límites adicionales para `/dashboard/login`, `/dashboard/*` y `/api/*`.
 - El origen debe aceptar tráfico solamente desde el CDN/WAF cuando la arquitectura lo permita.
 - Alertas para fallos repetidos de acceso, cambios DNS, emisión de certificados y consumo anormal de base de datos o imágenes.
+- SPF, DKIM y DMARC para impedir suplantación del correo del dominio.
+- Verificación del dominio y alertas de Problemas de seguridad en Google Search Console.
+
+Los pasos y plantillas están detallados en [`DNS-SECURITY.md`](./DNS-SECURITY.md).
 
 ## Verificación previa y recurrente
 

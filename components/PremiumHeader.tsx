@@ -157,6 +157,9 @@ export function PremiumHeader() {
           <Link href="/#contacto" onClick={() => setMenuOpen(false)} tabIndex={menuOpen ? 0 : -1}>
             Atención personalizada
           </Link>
+          <Link href="/privacidad-cookies" onClick={() => setMenuOpen(false)} tabIndex={menuOpen ? 0 : -1}>
+            Privacidad y cookies
+          </Link>
         </div>
       </div>
     </>

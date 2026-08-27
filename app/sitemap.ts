@@ -32,6 +32,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "daily",
       priority: 0.95
     },
+    {
+      url: absoluteUrl("/politicas-compra"),
+      lastModified,
+      changeFrequency: "monthly",
+      priority: 0.6
+    },
+    {
+      url: absoluteUrl("/privacidad-cookies"),
+      lastModified,
+      changeFrequency: "monthly",
+      priority: 0.5
+    },
     ...managedProducts.map((product) => ({
       url: absoluteUrl(`/catalogo/${product.code}`),
       lastModified: product.updatedAt,

@@ -111,33 +111,22 @@ const testimonialFrames = [
   }
 ] as const;
 
-const whatsappMessage = encodeURIComponent(
-  "Hola Store MAY. Quiero consultar precios, disponibilidad y opciones de pago por transferencia."
-);
-const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER?.replace(/\D/g, "") ?? "";
-const whatsappHref = whatsappNumber
-  ? `https://wa.me/${whatsappNumber}?text=${whatsappMessage}`
-  : `https://api.whatsapp.com/send?text=${whatsappMessage}`;
-
-function WhatsAppIcon() {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M12.04 2a10 10 0 0 0-8.66 14.99L2 22l5.15-1.35A10 10 0 1 0 12.04 2Zm0 18.2a8.2 8.2 0 0 1-4.23-1.16l-.3-.18-3.05.8.81-2.97-.2-.31a8.19 8.19 0 1 1 6.97 3.82Zm4.49-6.13c-.25-.12-1.46-.72-1.69-.8-.23-.08-.4-.12-.57.12-.16.25-.64.8-.78.97-.14.16-.29.18-.53.06-.25-.12-1.04-.38-1.98-1.22-.73-.65-1.23-1.46-1.37-1.7-.14-.25-.02-.38.1-.5.11-.11.25-.29.37-.43.12-.14.16-.25.25-.41.08-.17.04-.31-.02-.43-.06-.12-.57-1.37-.78-1.88-.2-.49-.41-.43-.57-.44h-.48c-.16 0-.43.06-.66.31-.23.25-.86.84-.86 2.05s.88 2.38 1 2.54c.12.16 1.73 2.64 4.19 3.71.59.25 1.04.4 1.4.52.59.19 1.12.16 1.54.1.47-.07 1.46-.6 1.67-1.17.21-.58.21-1.07.15-1.17-.06-.1-.23-.16-.48-.28Z" />
-    </svg>
-  );
-}
+const storeWhatsappHref = `https://api.whatsapp.com/send?text=${encodeURIComponent(
+  "Hola Store MAY, quiero recibir atención personalizada."
+)}`;
 
 export default function StoreExperience() {
   const [openFaq, setOpenFaq] = useState(0);
-  const [visitorCount, setVisitorCount] = useState<number | null>(null);
+  const [heroSoundEnabled, setHeroSoundEnabled] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const heroSoundEnabledRef = useRef(false);
 
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
     const startVideo = () => {
-      video.muted = true;
+      video.muted = !heroSoundEnabledRef.current;
       video.play().catch(() => undefined);
     };
 
@@ -155,26 +144,18 @@ export default function StoreExperience() {
     };
   }, []);
 
-  useEffect(() => {
-    const visitorKey = "store-may-visitor-id";
-    let visitorId = window.localStorage.getItem(visitorKey);
+  const toggleHeroSound = () => {
+    const video = videoRef.current;
+    if (!video) return;
 
-    if (!visitorId) {
-      visitorId = window.crypto.randomUUID();
-      window.localStorage.setItem(visitorKey, visitorId);
-    }
+    const nextSoundState = !heroSoundEnabledRef.current;
+    heroSoundEnabledRef.current = nextSoundState;
+    video.muted = !nextSoundState;
+    video.volume = 0.86;
+    setHeroSoundEnabled(nextSoundState);
 
-    fetch("/api/visitas", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ visitorId })
-    })
-      .then((response) => (response.ok ? response.json() : Promise.reject()))
-      .then((data: { count?: number }) => {
-        if (typeof data.count === "number") setVisitorCount(data.count);
-      })
-      .catch(() => undefined);
-  }, []);
+    if (nextSoundState) video.play().catch(() => undefined);
+  };
 
   return (
     <>
@@ -193,19 +174,38 @@ export default function StoreExperience() {
             ref={videoRef}
             className="hero-video"
             autoPlay
-            muted
+            muted={!heroSoundEnabled}
             loop
             playsInline
             preload="auto"
-            poster="/video/store-may-poster.webp"
+            poster="/video/store-may-poster-white-line.png"
             aria-label="Presentación audiovisual de Store MAY"
           >
             <source
-              src="/video/STORE_MAY_Experiencia_Status_15s_Sin_Sonido.mp4"
+              src="/video/store-may-0826-web.mp4"
               type="video/mp4"
             />
             Tu navegador no admite la reproducción de video.
           </video>
+          <span className="hero-video-wash" aria-hidden="true" />
+
+          <button
+            className={`hero-sound-control ${heroSoundEnabled ? "is-active" : ""}`}
+            type="button"
+            aria-pressed={heroSoundEnabled}
+            aria-label={heroSoundEnabled ? "Silenciar video" : "Activar sonido del video"}
+            onClick={toggleHeroSound}
+          >
+            <span className="hero-sound-icon" aria-hidden="true">
+              <i />
+              <i />
+              <i />
+            </span>
+            <span>
+              <small>Experiencia audiovisual</small>
+              <strong>{heroSoundEnabled ? "Sonido activado" : "Activar sonido"}</strong>
+            </span>
+          </button>
         </section>
 
         <section
@@ -254,6 +254,8 @@ export default function StoreExperience() {
                 loading="lazy"
                 allow="autoplay; fullscreen; xr-spatial-tracking"
                 allowFullScreen
+                sandbox="allow-scripts allow-same-origin allow-pointer-lock allow-presentation"
+                tabIndex={-1}
                 referrerPolicy="strict-origin-when-cross-origin"
               />
             </div>
@@ -278,87 +280,54 @@ export default function StoreExperience() {
             <span aria-hidden="true">C A T Á L O G O</span>
           </h2>
           <nav className="category-menu" aria-label="Compra por categoría">
-            {categories.map((category) => (
+            {categories.map((category, index) => (
               <a
                 href={`/catalogo?categoria=${encodeURIComponent(category.id === "mujeres" ? "Mujer" : category.id === "hombres" ? "Hombre" : category.id === "ninos" ? "Niños" : "Accesorios")}`}
                 key={category.id}
                 aria-label={category.label}
               >
+                <span className="category-menu-index" aria-hidden="true">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
                 <span className="category-menu-label" aria-hidden="true">
-                  {[...category.label.toLocaleUpperCase("es")].join(" ")}
+                  {category.label.toLocaleUpperCase("es")}
                 </span>
                 <span className="category-menu-orb" aria-hidden="true">
-                  <span className="category-menu-arrow">→</span>
+                  <span className="category-menu-arrow">+</span>
                 </span>
               </a>
             ))}
           </nav>
         </section>
 
-        <section className="advisor-showcase" id="contacto" aria-labelledby="advisor-title">
-          <Image
-            className="advisor-showcase-image"
-            src="/images/advisor-satin-background.jpg"
-            alt=""
-            fill
-            sizes="100vw"
-            quality={95}
-            aria-hidden="true"
-          />
-          <div className="advisor-showcase-box">
-            <Image
-              className="advisor-showcase-box-image"
-              src="/images/store-may-box-layer.png"
-              alt="Caja negra Store MAY sobre un fondo de satén oscuro"
-              fill
-              sizes="(max-width: 800px) 100vw, 94vw"
-              quality={100}
-              unoptimized
+        <section
+          className="advisor-showcase advisor-spline-showcase"
+          id="contacto"
+          aria-label="Experiencia interactiva Store MAY"
+        >
+          <div className="advisor-spline-stage">
+            <iframe
+              className="advisor-spline-viewer"
+              src="/spline-stage"
+              title="Objeto 3D interactivo de Store MAY"
+              loading="eager"
+              allow="fullscreen; xr-spatial-tracking"
+              referrerPolicy="same-origin"
             />
           </div>
-          <span className="advisor-showcase-light" aria-hidden="true" />
-          <div className="section-shell advisor-showcase-layout">
-            <h2 className="sr-only" id="advisor-title">
-              Precios, pagos y atención personalizada de Store MAY
-            </h2>
-            <div className="advisor-phone-stage">
-              <div className="advisor-phone-frame">
-                <Image
-                  className="advisor-phone-image"
-                  src="/images/store-may-advisor-phone.jpg"
-                  alt="Store MAY: precios y pagos, pregunta antes de elegir y consulta disponibilidad"
-                  fill
-                  sizes="(max-width: 520px) 84vw, (max-width: 800px) 68vw, 430px"
-                  quality={95}
-                  priority={false}
-                />
-                <span className="advisor-phone-sheen" aria-hidden="true" />
-              </div>
-              <a
-                className="advisor-whatsapp-orb"
-                href={whatsappHref}
-                target="_blank"
-                rel="noreferrer"
-                aria-label="Abrir WhatsApp para consultar precios y disponibilidad"
-              >
-                <span aria-hidden="true">
-                  <WhatsAppIcon />
-                </span>
-                <span className="sr-only">WhatsApp</span>
-              </a>
-            </div>
-            <output
-              className="visitor-corner"
-              aria-live="polite"
-              aria-label={
-                visitorCount === null
-                  ? "Contador de visitantes cargando"
-                  : `${visitorCount.toLocaleString("es")} visitantes registrados`
-              }
-            >
-              {visitorCount === null ? "—" : visitorCount.toLocaleString("es")}
-            </output>
-          </div>
+          <a
+            className="advisor-whatsapp-button"
+            href={storeWhatsappHref}
+            target="_blank"
+            rel="noreferrer"
+            aria-label="Contactar a Store MAY por WhatsApp"
+          >
+            <span className="advisor-whatsapp-icon" aria-hidden="true">
+              <svg viewBox="0 0 32 32">
+                <path d="M16.03 4.3A11.5 11.5 0 0 0 6.3 21.94L4.8 27.4l5.59-1.46a11.5 11.5 0 1 0 5.64-21.64Zm0 20.96c-1.75 0-3.46-.48-4.95-1.38l-.36-.21-3.32.87.89-3.24-.23-.37a9.45 9.45 0 1 1 7.97 4.33Zm5.18-7.07c-.28-.14-1.67-.82-1.93-.92-.26-.09-.45-.14-.64.14-.19.28-.73.92-.9 1.11-.16.19-.33.21-.61.07-.28-.14-1.19-.44-2.26-1.4a8.44 8.44 0 0 1-1.57-1.95c-.16-.28-.02-.43.12-.57.13-.13.28-.33.42-.49.14-.16.19-.28.28-.47.09-.19.05-.35-.02-.49-.07-.14-.64-1.55-.88-2.12-.23-.56-.47-.48-.64-.49h-.54c-.19 0-.49.07-.75.35-.26.28-.99.97-.99 2.36s1.02 2.74 1.16 2.93c.14.19 2 3.06 4.85 4.29.68.29 1.21.47 1.62.6.68.22 1.3.19 1.79.12.55-.08 1.67-.68 1.9-1.34.23-.66.23-1.22.16-1.34-.07-.12-.26-.19-.54-.33Z" />
+              </svg>
+            </span>
+          </a>
         </section>
 
         <section className="testimonials" id="testimonios" aria-labelledby="testimonials-title">
@@ -447,6 +416,8 @@ export default function StoreExperience() {
             <p>Contacto</p>
             <a href="#contacto">Atención personalizada</a>
             <a href="#marcas">Nuestras marcas</a>
+            <a href="/politicas-compra">Políticas de compra y entregas</a>
+            <a href="/privacidad-cookies">Privacidad y cookies</a>
           </div>
         </div>
         <div className="section-shell footer-legal">

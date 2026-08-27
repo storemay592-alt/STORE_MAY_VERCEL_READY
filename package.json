@@ -6,28 +6,37 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "start:local": "next start -p 4174",
     "db:migrate": "node scripts/migrate.mjs",
     "catalog:import": "node scripts/import-catalog.mjs",
     "admin:create": "node scripts/create-admin.mjs",
     "security:check": "node scripts/check-security-env.mjs",
-    "typecheck": "tsc --noEmit"
+    "security:audit": "npm audit --omit=dev --audit-level=high",
+    "typecheck": "tsc --noEmit",
+    "verify": "npm run typecheck && npm run security:audit && npm run build",
+    "release:index": "node scripts/generate-index.mjs",
+    "release:prepare": "npm run release:index && npm run verify"
+  },
+  "engines": {
+    "node": ">=22.0.0 <25",
+    "npm": ">=10"
   },
   "dependencies": {
-    "@imagekit/nodejs": "^7.11.0",
-    "@neondatabase/serverless": "^1.1.0",
-    "bcryptjs": "^3.0.3",
-    "jose": "^6.2.10",
-    "next": "latest",
-    "react": "latest",
-    "react-dom": "latest",
-    "server-only": "^0.0.1",
+    "@imagekit/nodejs": "7.11.0",
+    "@neondatabase/serverless": "1.1.0",
+    "bcryptjs": "3.0.3",
+    "jose": "6.2.10",
+    "next": "16.3.2",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "server-only": "0.0.1",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz",
-    "zod": "^4.4.3"
+    "zod": "4.4.3"
   },
   "devDependencies": {
-    "@types/node": "latest",
-    "@types/react": "latest",
-    "@types/react-dom": "latest",
-    "typescript": "latest"
+    "@types/node": "26.2.0",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.4",
+    "typescript": "7.0.2"
   }
 }
