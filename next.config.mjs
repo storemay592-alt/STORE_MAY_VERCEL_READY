@@ -38,11 +38,25 @@ const nextConfig = {
     qualities: [75, 95, 100]
   },
   async headers() {
+    const staticAssetHeaders = [
+      { key: "Cache-Control", value: "public, max-age=31536000, immutable" }
+    ];
+
     return [
       { source: "/:path*", headers: securityHeaders },
       { source: "/dashboard/:path*", headers: privateHeaders },
       { source: "/admin/:path*", headers: privateHeaders },
-      { source: "/api/:path*", headers: privateHeaders }
+      { source: "/api/:path*", headers: privateHeaders },
+      // Video, image, font and brand assets are all filename-versioned
+      // (e.g. store-may-0826-*), so it's safe to cache them long-term and
+      // immutably: browsers/CDN stop re-fetching them on every visit,
+      // which is what made the hero video feel heavy/slow to (re)load.
+      { source: "/video/:path*", headers: staticAssetHeaders },
+      { source: "/images/:path*", headers: staticAssetHeaders },
+      { source: "/brand/:path*", headers: staticAssetHeaders },
+      { source: "/catalog/:path*", headers: staticAssetHeaders },
+      { source: "/fonts/:path*", headers: staticAssetHeaders },
+      { source: "/spline/:path*", headers: staticAssetHeaders }
     ];
   }
 };

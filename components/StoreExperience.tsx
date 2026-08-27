@@ -222,7 +222,7 @@ export default function StoreExperience() {
             muted={!heroSoundEnabled}
             loop
             playsInline
-            preload="metadata"
+            preload="auto"
             disablePictureInPicture
             aria-label="Presentación audiovisual de Store MAY"
           >
