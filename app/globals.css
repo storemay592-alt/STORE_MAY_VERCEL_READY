@@ -5313,11 +5313,16 @@ button {
 }
 
 @media (max-width: 767px) {
+  /* The mobile video file is filmed at 9:16 (720x1280). Matching the
+     hero box to that exact ratio means the video always fills it AND
+     shows its full frame at the same time — no crop, no empty bars,
+     on any phone width. max-height keeps it from ever exceeding the
+     visible viewport on unusually short screens. */
   .hero {
     width: 100%;
-    height: calc(100svh - 76px);
-    min-height: 560px;
-    max-height: 780px;
+    aspect-ratio: 9 / 16;
+    max-height: calc(100svh - 76px);
+    min-height: 400px;
   }
 
   .hero-video,
