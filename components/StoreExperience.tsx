@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
+import { DeferredSplineFrame } from "@/components/DeferredSplineFrame";
 import { PremiumHeader } from "@/components/PremiumHeader";
 import { faqs } from "@/data/faqs";
 import { categories } from "@/lib/catalog";
@@ -118,6 +119,7 @@ const storeWhatsappHref = `https://api.whatsapp.com/send?text=${encodeURICompone
 export default function StoreExperience() {
   const [openFaq, setOpenFaq] = useState(0);
   const [heroSoundEnabled, setHeroSoundEnabled] = useState(false);
+  const [heroVideoReady, setHeroVideoReady] = useState(false);
   const heroRef = useRef<HTMLElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const heroSoundEnabledRef = useRef(false);
@@ -204,7 +206,10 @@ export default function StoreExperience() {
           <h1 className="sr-only">
             Store MAY: ropa, calzado y accesorios de marcas 100% originales
           </h1>
-          <picture className="hero-poster" aria-hidden="true">
+          <picture
+            className={`hero-poster ${heroVideoReady ? "is-hidden" : ""}`}
+            aria-hidden="true"
+          >
             <source
               media="(max-width: 900px) and (orientation: portrait)"
               srcSet="/video/store-may-0826-mobile-poster.webp"
@@ -222,12 +227,18 @@ export default function StoreExperience() {
             muted={!heroSoundEnabled}
             loop
             playsInline
-            preload="auto"
+            preload="metadata"
             disablePictureInPicture
             aria-label="Presentación audiovisual de Store MAY"
+            onLoadedData={() => setHeroVideoReady(true)}
+            onPlaying={() => setHeroVideoReady(true)}
           >
             <source
-              media="(min-width: 768px)"
+              media="(max-width: 900px) and (orientation: portrait)"
+              src="/video/store-may-0826-mobile.mp4"
+              type="video/mp4"
+            />
+            <source
               src="/video/store-may-0826-desktop.webm"
               type="video/webm"
             />
@@ -295,13 +306,9 @@ export default function StoreExperience() {
               Marcas premium, precios inteligentes y productos 100% originales
             </h2>
             <div className="spline-experience">
-              <iframe
-                src="/spline-original"
+              <DeferredSplineFrame
+                src="https://my.spline.design/ticktockinteractivelanding-nb2Si9kAK23qhl7VmMKts2zt/"
                 title="Experiencia interactiva 100% original de Store MAY"
-                loading="lazy"
-                allow="fullscreen; xr-spatial-tracking"
-                tabIndex={-1}
-                referrerPolicy="same-origin"
               />
             </div>
             <div className="premium-pricing-mark">
@@ -327,7 +334,7 @@ export default function StoreExperience() {
           <nav className="category-menu" aria-label="Compra por categoría">
             {categories.map((category, index) => (
               <a
-                href={`/catalogo?categoria=${encodeURIComponent(category.id === "mujeres" ? "Mujer" : category.id === "hombres" ? "Hombre" : category.id === "ninos" ? "Niños" : "Accesorios")}`}
+                href={`/tienda?categoria=${category.id}`}
                 key={category.id}
                 aria-label={category.label}
               >
@@ -351,13 +358,10 @@ export default function StoreExperience() {
           aria-label="Experiencia interactiva Store MAY"
         >
           <div className="advisor-spline-stage">
-            <iframe
+            <DeferredSplineFrame
               className="advisor-spline-viewer"
               src="/spline-stage"
               title="Objeto 3D interactivo de Store MAY"
-              loading="lazy"
-              allow="fullscreen; xr-spatial-tracking"
-              referrerPolicy="same-origin"
             />
           </div>
           <a
@@ -452,7 +456,7 @@ export default function StoreExperience() {
           <nav aria-label="Categorías del pie de página">
             <p>Categorías</p>
             {categories.map((category) => (
-              <a href={`/catalogo?categoria=${encodeURIComponent(category.id === "mujeres" ? "Mujer" : category.id === "hombres" ? "Hombre" : category.id === "ninos" ? "Niños" : "Accesorios")}`} key={category.id}>
+              <a href={`/tienda?categoria=${category.id}`} key={category.id}>
                 {category.label}
               </a>
             ))}

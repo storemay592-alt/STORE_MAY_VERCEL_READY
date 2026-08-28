@@ -3,7 +3,9 @@ const isProduction = process.env.NODE_ENV === "production";
 const securityHeaders = [
   { key: "X-DNS-Prefetch-Control", value: "off" },
   { key: "X-Content-Type-Options", value: "nosniff" },
-  { key: "X-Frame-Options", value: "DENY" },
+  // Store MAY embeds its two same-origin Spline stage routes. SAMEORIGIN keeps
+  // external sites from framing the storefront while allowing those scenes.
+  { key: "X-Frame-Options", value: "SAMEORIGIN" },
   { key: "X-XSS-Protection", value: "0" },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
   { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), payment=(), usb=(), browsing-topics=()" },

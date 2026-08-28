@@ -9,7 +9,7 @@ function configuredPublicOrigin() {
   }
 }
 
-function contentSecurityPolicy(nonce: string, allowSplineWasm = false) {
+function contentSecurityPolicy(nonce: string, allowEmbeddedScene = false) {
   const isDevelopment = process.env.NODE_ENV === "development";
   const imageKitOrigin = (() => {
     try {
@@ -23,7 +23,7 @@ function contentSecurityPolicy(nonce: string, allowSplineWasm = false) {
 
   return `
     default-src 'self';
-    script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${allowSplineWasm ? " 'wasm-unsafe-eval'" : ""}${isDevelopment ? " 'unsafe-eval'" : ""};
+    script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${allowEmbeddedScene ? " 'wasm-unsafe-eval'" : ""}${isDevelopment ? " 'unsafe-eval'" : ""};
     style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
     img-src 'self' blob: data: ${imageKitOrigin} https://*.imagekit.io https://prod.spline.design;
     font-src 'self' data: https://fonts.gstatic.com;
@@ -35,7 +35,7 @@ function contentSecurityPolicy(nonce: string, allowSplineWasm = false) {
     object-src 'none';
     base-uri 'self';
     form-action 'self';
-    frame-ancestors ${allowSplineWasm ? "'self'" : "'none'"};
+    frame-ancestors ${allowEmbeddedScene ? "'self'" : "'none'"};
     ${isDevelopment ? "" : "upgrade-insecure-requests;"}
   `.replace(/\s{2,}/g, " ").trim();
 }
@@ -81,7 +81,10 @@ export function proxy(request: NextRequest) {
   }
 
   const nonce = crypto.randomUUID().replace(/-/g, "");
-  const csp = contentSecurityPolicy(nonce, request.nextUrl.pathname === "/spline-stage");
+  const isEmbeddedScene =
+    request.nextUrl.pathname === "/spline-stage" ||
+    request.nextUrl.pathname === "/spline-original";
+  const csp = contentSecurityPolicy(nonce, isEmbeddedScene);
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-nonce", nonce);
   requestHeaders.set("Content-Security-Policy", csp);

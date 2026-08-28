@@ -5,13 +5,6 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { categories } from "@/lib/catalog";
 
-const publicCategory: Record<string, string> = {
-  mujeres: "Mujer",
-  hombres: "Hombre",
-  ninos: "Niños",
-  accesorios: "Accesorios"
-};
-
 function SearchIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -71,7 +64,7 @@ export function PremiumHeader() {
 
         <nav className="premium-desktop-nav" aria-label="Categorías principales">
           {categories.map((category) => (
-            <Link key={category.id} href={`/catalogo?categoria=${encodeURIComponent(publicCategory[category.id])}`}>
+            <Link key={category.id} href={`/tienda?categoria=${category.id}`}>
               {category.label}
             </Link>
           ))}
@@ -81,7 +74,8 @@ export function PremiumHeader() {
         </nav>
 
         <div className="premium-header-actions">
-          <form className="premium-search" action="/catalogo" method="get" role="search">
+          <span className="premium-store-status">Tienda online</span>
+          <form className="premium-search" action="/tienda" method="get" role="search">
             <SearchIcon />
             <input
               type="search"
@@ -102,7 +96,7 @@ export function PremiumHeader() {
           </Link>
           <Link
             className="premium-icon-action"
-            href="/catalogo"
+            href="/tienda"
             aria-label="Ver catálogo de productos"
             title="Ver catálogo"
           >
@@ -127,7 +121,7 @@ export function PremiumHeader() {
         id="premium-mobile-panel"
         aria-hidden={!menuOpen}
       >
-        <form className="premium-mobile-search" action="/catalogo" method="get" role="search">
+        <form className="premium-mobile-search" action="/tienda" method="get" role="search">
           <SearchIcon />
           <input
             type="search"
@@ -142,7 +136,7 @@ export function PremiumHeader() {
           {categories.map((category, index) => (
             <Link
               key={category.id}
-              href={`/catalogo?categoria=${encodeURIComponent(publicCategory[category.id])}`}
+              href={`/tienda?categoria=${category.id}`}
               onClick={() => setMenuOpen(false)}
               tabIndex={menuOpen ? 0 : -1}
             >

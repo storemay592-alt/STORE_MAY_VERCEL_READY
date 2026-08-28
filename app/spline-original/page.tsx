@@ -13,7 +13,7 @@ export default async function SplineOriginalPage() {
       />
       {createElement("spline-viewer", {
         url: "https://prod.spline.design/n4ECos8L3-dXpDKi/scene.splinecode",
-        loading: "eager",
+        loading: "lazy",
         renderer: "webgl",
         "aria-label": "Marcas premium, precios inteligentes y productos 100% originales"
       })}

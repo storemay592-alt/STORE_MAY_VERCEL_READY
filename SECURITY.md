@@ -8,7 +8,7 @@ No publiques claves, capturas del panel ni detalles explotables en un issue púb
 
 ## Controles implementados en la aplicación
 
-- CSP estricta con nonce diferente por respuesta, `frame-ancestors 'none'`, `object-src 'none'`, `base-uri 'self'` y restricción de scripts, imágenes, fuentes, conexiones e iframes.
+- CSP estricta con nonce diferente por respuesta, `frame-ancestors 'none'` en la tienda y excepción limitada a `'self'` únicamente en las dos rutas internas de escenas Spline, `object-src 'none'`, `base-uri 'self'` y restricción de scripts, imágenes, fuentes, conexiones e iframes.
 - Validación del host público: en producción, las visitas se normalizan al dominio canónico y las escrituras enviadas a un dominio alternativo se rechazan.
 - Cabeceras contra MIME sniffing, clickjacking, filtración de referente y acceso innecesario a cámara, micrófono, ubicación, pagos y USB.
 - Redirección permanente a HTTPS en producción y HSTS durante un año. No se habilita `includeSubDomains` hasta confirmar que todos los subdominios usan HTTPS.

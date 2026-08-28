@@ -13,7 +13,7 @@ export default async function SplineStagePage() {
       />
       {createElement("spline-viewer", {
         url: "/spline/store-may-scene.splinecode",
-        loading: "eager",
+        loading: "lazy",
         renderer: "webgl",
         "aria-label": "Objeto 3D interactivo de Store MAY"
       })}
