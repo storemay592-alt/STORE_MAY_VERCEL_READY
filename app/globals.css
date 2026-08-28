@@ -5100,13 +5100,6 @@ button {
   background: transparent;
 }
 
-/* The scene now has its own responsive/adaptive layout configured
-   directly in Spline (breakpoints set inside the Spline editor), so the
-   live embed reflows itself — no CSS-side fallback needed here anymore. */
-.spline-experience-fallback {
-  display: none;
-}
-
 .premium-pricing-mark {
   position: absolute;
   z-index: 5;

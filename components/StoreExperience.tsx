@@ -301,19 +301,13 @@ export default function StoreExperience() {
             </h2>
             <div className="spline-experience">
               <iframe
-                src="https://my.spline.design/ticktockinteractivelanding-nb2Si9kAK23qhl7VmMKts2zt/"
+                src="/spline-original"
                 title="Experiencia interactiva 100% original de Store MAY"
                 loading="lazy"
-                allow="autoplay; fullscreen; xr-spatial-tracking"
-                allowFullScreen
-                sandbox="allow-scripts allow-same-origin allow-pointer-lock allow-presentation"
+                allow="fullscreen; xr-spatial-tracking"
                 tabIndex={-1}
-                referrerPolicy="strict-origin-when-cross-origin"
+                referrerPolicy="same-origin"
               />
-              <div className="spline-experience-fallback" aria-hidden="true">
-                <span>100%</span>
-                <strong>Original</strong>
-              </div>
             </div>
             <div className="premium-pricing-mark">
               <Image
