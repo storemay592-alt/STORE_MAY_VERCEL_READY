@@ -5100,51 +5100,11 @@ button {
   background: transparent;
 }
 
-/* The Spline scene's text has a fixed 3D camera position and doesn't
-   reflow for narrow screens (that would need to be configured inside
-   Spline's own editor, which this codebase has no access to). Rather
-   than keep guessing crop values that clip the word "ORIGINAL", we
-   swap the iframe for plain, genuinely responsive HTML text on phones
-   only — it always renders complete, on any screen size. Desktop and
-   tablet keep the interactive 3D scene unchanged. */
+/* The scene now has its own responsive/adaptive layout configured
+   directly in Spline (breakpoints set inside the Spline editor), so the
+   live embed reflows itself — no CSS-side fallback needed here anymore. */
 .spline-experience-fallback {
   display: none;
-}
-
-@media (max-width: 767px) {
-  .spline-experience iframe {
-    display: none;
-  }
-
-  .spline-experience-fallback {
-    position: absolute;
-    inset: 0;
-    z-index: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: clamp(4px, 1.4vw, 10px);
-    text-align: center;
-    pointer-events: none;
-  }
-
-  .spline-experience-fallback span {
-    font-family: var(--jost, sans-serif);
-    font-weight: 300;
-    font-size: clamp(2.4rem, 15vw, 3.4rem);
-    letter-spacing: 0.01em;
-    color: oklch(0.96 0.006 245);
-  }
-
-  .spline-experience-fallback strong {
-    font-family: var(--jost, sans-serif);
-    font-weight: 500;
-    font-size: clamp(1.3rem, 7vw, 1.9rem);
-    letter-spacing: 0.3em;
-    text-transform: uppercase;
-    color: oklch(0.96 0.006 245);
-  }
 }
 
 .premium-pricing-mark {
@@ -5371,7 +5331,7 @@ button {
   .hero-poster img {
     width: 100%;
     height: 100%;
-    object-fit: contain;
+    object-fit: cover;
     object-position: center;
     transform: none;
   }
