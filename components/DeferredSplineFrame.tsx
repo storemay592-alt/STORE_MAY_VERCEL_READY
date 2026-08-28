@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 type DeferredSplineFrameProps = {
   className?: string;
@@ -25,7 +25,24 @@ export function DeferredSplineFrame({
   const idleCallbackRef = useRef<number | null>(null);
   const [isMounted, setIsMounted] = useState(false);
   const [isReady, setIsReady] = useState(false);
+  const [isInteractive, setIsInteractive] = useState(false);
   const [requiresConsent, setRequiresConsent] = useState(false);
+
+  const releaseInteraction = useCallback(() => {
+    setIsInteractive(false);
+    hostRef.current?.querySelector("iframe")?.blur();
+  }, []);
+
+  useEffect(() => {
+    if (!isInteractive) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") releaseInteraction();
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isInteractive, releaseInteraction]);
 
   useEffect(() => {
     const host = hostRef.current;
@@ -73,6 +90,7 @@ export function DeferredSplineFrame({
             else window.clearTimeout(idleCallbackRef.current);
             idleCallbackRef.current = null;
           }
+          setIsInteractive(false);
           setIsMounted(false);
           setIsReady(false);
         }, 320);
@@ -95,8 +113,10 @@ export function DeferredSplineFrame({
   return (
     <div
       ref={hostRef}
-      className={`deferred-spline-frame ${isReady ? "is-ready" : ""}`}
+      className={`deferred-spline-frame ${isReady ? "is-ready" : ""} ${isInteractive ? "is-interactive" : ""}`}
       data-spline-status={isReady ? "ready" : "pending"}
+      data-spline-interaction={isInteractive ? "active" : "released"}
+      onPointerLeave={releaseInteraction}
     >
       {isMounted ? (
         <iframe
@@ -104,6 +124,7 @@ export function DeferredSplineFrame({
           src={src}
           title={title}
           loading="lazy"
+          tabIndex={isInteractive ? 0 : -1}
           allow="autoplay; fullscreen; xr-spatial-tracking"
           allowFullScreen
           referrerPolicy="strict-origin-when-cross-origin"
@@ -126,6 +147,31 @@ export function DeferredSplineFrame({
 
       {isMounted && !isReady ? (
         <span className="deferred-spline-loader" aria-hidden="true" />
+      ) : null}
+
+      {isMounted && isReady && !isInteractive ? (
+        <button
+          className="deferred-spline-entry-surface"
+          type="button"
+          tabIndex={-1}
+          aria-hidden="true"
+          onClick={() => setIsInteractive(true)}
+        />
+      ) : null}
+
+      {isMounted && isReady ? (
+        <button
+          className="deferred-spline-interaction"
+          type="button"
+          aria-pressed={isInteractive}
+          onClick={() => {
+            if (isInteractive) releaseInteraction();
+            else setIsInteractive(true);
+          }}
+        >
+          <span aria-hidden="true" />
+          {isInteractive ? "Liberar scroll" : "Explorar 3D"}
+        </button>
       ) : null}
     </div>
   );

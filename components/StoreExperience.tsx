@@ -450,7 +450,13 @@ export default function StoreExperience() {
       <footer className="footer">
         <div className="section-shell footer-grid">
           <div className="footer-brand">
-            <Image src="/brand/store-may-header.webp" alt="Store MAY" width={900} height={386} />
+            <Image
+              className="footer-brand-cubes"
+              src="/brand/store-may-cubos.png"
+              alt="Store MAY"
+              width={634}
+              height={283}
+            />
             <p>Moda y accesorios de marcas internacionales. 100% originales.</p>
           </div>
           <nav aria-label="Categorías del pie de página">
