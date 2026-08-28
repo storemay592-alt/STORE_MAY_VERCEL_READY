@@ -227,11 +227,6 @@ export default function StoreExperience() {
             aria-label="Presentación audiovisual de Store MAY"
           >
             <source
-              media="(max-width: 900px) and (orientation: portrait)"
-              src="/video/store-may-0826-mobile.mp4"
-              type="video/mp4"
-            />
-            <source
               media="(min-width: 768px)"
               src="/video/store-may-0826-desktop.webm"
               type="video/webm"
