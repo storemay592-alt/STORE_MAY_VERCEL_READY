@@ -2352,11 +2352,11 @@ button {
 
 .testimonials-heading h2 {
   margin: 0;
-  font-family: var(--jost);
+  font-family: var(--montserrat);
   font-size: clamp(3rem, 5.4vw, 6rem);
-  font-weight: 340;
-  letter-spacing: -0.05em;
-  line-height: 0.9;
+  font-weight: 500;
+  letter-spacing: 0.015em;
+  line-height: 0.94;
 }
 
 .testimonial-grid {
@@ -5246,11 +5246,20 @@ button {
 
 @media (max-width: 700px) {
   .deferred-spline-interaction {
-    top: 10px;
-    right: 10px;
-    min-height: 34px;
-    padding: 8px 11px;
-    font-size: 0.5rem;
+    top: 5px;
+    right: 8px;
+    min-height: 28px;
+    gap: 6px;
+    padding: 5px 9px;
+    border-color: rgba(255, 255, 255, 0.16);
+    font-size: 0.43rem;
+    letter-spacing: 0.1em;
+  }
+
+  .deferred-spline-interaction > span {
+    width: 5px;
+    height: 5px;
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.05);
   }
 }
 
@@ -5441,8 +5450,7 @@ button {
   }
 }
 
-.spline-experience::before,
-.advisor-spline-stage::after {
+.spline-experience::before {
   position: absolute;
   z-index: 4;
   right: 0;
@@ -5455,8 +5463,7 @@ button {
 }
 
 @media (max-width: 520px) {
-  .spline-experience::before,
-  .advisor-spline-stage::after {
+  .spline-experience::before {
     width: 204px;
     height: 70px;
   }
@@ -5611,6 +5618,10 @@ button {
     width: min(46vw, 180px);
     height: 52px;
     background: #000;
+  }
+
+  .advisor-spline-stage::after {
+    display: none;
   }
 }
 

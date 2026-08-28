@@ -388,7 +388,7 @@ export default function StoreExperience() {
           <div className="section-shell testimonials-inner">
             <header className="testimonials-heading">
               <p>Experiencias Store MAY</p>
-              <h2 id="testimonials-title">Testimonios.</h2>
+              <h2 id="testimonials-title">TESTIMONIOS</h2>
             </header>
             <div className="testimonial-grid">
               {testimonialFrames.map((item) => (

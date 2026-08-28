@@ -15,3 +15,5 @@ certificates/
 outputs/
 preview-*.png
 *.zip
+AGENTS.md
+CLAUDE.md
