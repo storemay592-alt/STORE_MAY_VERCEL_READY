@@ -311,15 +311,6 @@ export default function StoreExperience() {
                 title="Experiencia interactiva 100% original de Store MAY"
               />
             </div>
-            <div className="premium-pricing-mark">
-              <Image
-                src="/images/store-may-premium-pricing.png"
-                alt="Marcas premium, precios inteligentes"
-                width={1178}
-                height={57}
-                unoptimized
-              />
-            </div>
           </section>
         </section>
 

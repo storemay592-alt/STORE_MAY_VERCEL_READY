@@ -3408,6 +3408,7 @@ button {
   background: transparent;
 }
 
+
 .advisor-showcase::after {
   position: absolute;
   z-index: 4;
@@ -5040,13 +5041,12 @@ button {
   position: relative;
   isolation: isolate;
   display: block;
-  width: min(1080px, 92vw);
+  width: 100%;
   height: auto;
-  aspect-ratio: 16 / 10;
-  margin: clamp(44px, 6vw, 88px) auto;
+  aspect-ratio: 16 / 9;
+  margin: 0;
   padding: 0;
   overflow: hidden;
-  border-radius: 6px;
   background: #000;
 }
 
@@ -5318,9 +5318,9 @@ button {
 
 @media (max-width: 767px) {
   .authenticity.authenticity--spline {
-    width: 92vw;
-    aspect-ratio: 4 / 5;
-    margin-block: 36px;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    margin: 0;
   }
 
   .premium-pricing-mark {
@@ -5593,8 +5593,8 @@ button {
 
 @media (max-width: 900px) {
   .authenticity.authenticity--spline {
-    width: 90vw;
-    aspect-ratio: 4 / 3;
+    width: 100%;
+    aspect-ratio: 16 / 9;
   }
 
   .advisor-showcase.advisor-spline-showcase {
