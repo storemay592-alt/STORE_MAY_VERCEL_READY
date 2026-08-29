@@ -2320,6 +2320,8 @@ button {
 }
 
 .testimonials-heading {
+  position: relative;
+  z-index: 3;
   display: grid;
   grid-template-columns: minmax(190px, 0.62fr) minmax(0, 1.38fr);
   align-items: end;
@@ -2340,9 +2342,10 @@ button {
   margin: 0;
   font-family: var(--montserrat);
   font-size: clamp(3rem, 5.4vw, 6rem);
-  font-weight: 340;
-  letter-spacing: -0.05em;
+  font-weight: 600;
+  letter-spacing: -0.02em;
   line-height: 0.9;
+  color: #000;
 }
 
 .testimonial-grid {
@@ -3265,12 +3268,32 @@ button {
 }
 
 .advisor-spline-viewer {
+  position: absolute;
+  inset: 0;
   display: block;
   width: 100%;
   height: 100%;
-  min-height: inherit;
+  min-height: 100%;
   border: 0;
   background: transparent;
+}
+
+.advisor-spline-stage::after {
+  position: absolute;
+  z-index: 4;
+  right: 0;
+  bottom: 0;
+  width: clamp(160px, 22vw, 260px);
+  height: clamp(50px, 6.5vw, 74px);
+  content: "";
+  pointer-events: none;
+  background: radial-gradient(
+    135% 155% at 100% 100%,
+    oklch(0.025 0.005 250) 0%,
+    oklch(0.025 0.005 250 / 0.92) 38%,
+    oklch(0.025 0.005 250 / 0.55) 66%,
+    transparent 100%
+  );
 }
 
 .advisor-whatsapp-button {
@@ -3390,6 +3413,40 @@ button {
   width: 100%;
   height: 100%;
   background: transparent;
+}
+
+/* Embedded Spline landing (my.spline.design): the external page centers and
+   scales its own canvas, so the wrapper just has to be a full-bleed,
+   centered box for it to fill. */
+.spline-embed-page {
+  position: relative;
+  display: grid;
+  place-items: center;
+  background: #000;
+}
+
+.spline-embed-frame {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: transparent;
+}
+
+/* Black corner mask over the "Built with Spline" badge, so the route is
+   clean even if it is opened directly (not only when framed by the home
+   page, which has its own cover). */
+.spline-embed-page::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: clamp(190px, 26vw, 320px);
+  height: clamp(58px, 8vw, 96px);
+  background: #000;
+  -webkit-mask-image: radial-gradient(140% 150% at 100% 100%, #000 58%, transparent 100%);
+  mask-image: radial-gradient(140% 150% at 100% 100%, #000 58%, transparent 100%);
+  pointer-events: none;
 }
 
 .advisor-showcase::after {
@@ -5022,10 +5079,7 @@ button {
   min-height: 480px;
   padding: 0;
   overflow: hidden;
-  background:
-    linear-gradient(90deg, oklch(0.045 0.004 250 / 0.62) 0%, transparent 40%, oklch(0.045 0.004 250 / 0.18) 100%),
-    linear-gradient(180deg, oklch(0.05 0.004 250 / 0.18) 0%, transparent 50%, oklch(0.035 0.003 250 / 0.68) 100%),
-    url("/images/store-may-satin-background.webp") center / cover no-repeat;
+  background: #000;
 }
 
 .authenticity.authenticity--spline::before {
@@ -5048,18 +5102,20 @@ button {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background: transparent;
+  background: #000;
 }
 
+/* Solid black frame around the embedded 3D scene: if the scene letterboxes
+   or does not reach every edge, these black bands hide the seam / grey bars
+   instead of leaving a mismatched border. */
 .spline-experience::after {
   content: "";
   position: absolute;
   z-index: 3;
   inset: 0;
   background:
-    radial-gradient(circle at 53% 47%, oklch(0.98 0.006 250 / 0.05) 0%, transparent 34%),
-    linear-gradient(90deg, oklch(0.025 0.002 250 / 0.5) 0%, transparent 34% 74%, oklch(0.025 0.002 250 / 0.28) 100%),
-    linear-gradient(180deg, oklch(0.025 0.002 250 / 0.12), transparent 22% 58%, oklch(0.025 0.002 250 / 0.48) 100%);
+    linear-gradient(90deg, #000 0 2.4%, transparent 6% 94%, #000 97.6% 100%),
+    linear-gradient(180deg, #000 0 2%, transparent 6% 92%, #000 98% 100%);
   pointer-events: none;
 }
 
@@ -5073,6 +5129,218 @@ button {
   height: calc(100% + 8px);
   border: 0;
   background: transparent;
+}
+
+/* Cover the "Built with Spline" attribution badge that the 3D viewer
+   paints in its bottom-right corner. The in-scene script also hides it,
+   this is the guaranteed visual fallback. */
+.spline-experience::before {
+  position: absolute;
+  z-index: 4;
+  right: 0;
+  bottom: 0;
+  width: clamp(190px, 26vw, 320px);
+  height: clamp(58px, 8vw, 96px);
+  content: "";
+  pointer-events: none;
+  background: #000;
+  -webkit-mask-image: radial-gradient(140% 150% at 100% 100%, #000 58%, transparent 100%);
+  mask-image: radial-gradient(140% 150% at 100% 100%, #000 58%, transparent 100%);
+}
+
+/* The deferred Spline wrapper carries no size of its own, so give it one:
+   it fills whichever section hosts it and lets the scene / iframe stretch
+   edge to edge instead of collapsing to the iframe's default height. */
+.deferred-spline-frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  overflow: clip;
+  background: transparent;
+  pointer-events: none;
+  touch-action: pan-y;
+  user-select: none;
+}
+
+.deferred-spline-frame iframe {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: transparent;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 380ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.spline-experience .deferred-spline-frame iframe {
+  top: -4px;
+  left: -4px;
+  inset: auto;
+  width: calc(100% + 8px);
+  height: calc(100% + 8px);
+}
+
+.deferred-spline-frame.is-ready iframe {
+  opacity: 1;
+}
+
+.deferred-spline-frame.is-interactive {
+  pointer-events: auto;
+  touch-action: none;
+}
+
+.deferred-spline-frame.is-interactive iframe {
+  pointer-events: auto;
+}
+
+.deferred-spline-entry-surface {
+  position: absolute;
+  z-index: 8;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: grab;
+  pointer-events: auto;
+  touch-action: pan-y;
+}
+
+.deferred-spline-loader {
+  position: absolute;
+  z-index: 6;
+  left: 50%;
+  bottom: 18px;
+  width: 54px;
+  height: 2px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: oklch(0.8 0.006 245 / 0.2);
+  opacity: 0.7;
+  transform: translateX(-50%);
+  transition: opacity 240ms ease;
+}
+
+.deferred-spline-loader::after {
+  position: absolute;
+  inset: 0;
+  width: 45%;
+  border-radius: inherit;
+  background: oklch(0.96 0.004 245 / 0.82);
+  content: "";
+  animation: spline-load-progress 1.15s ease-in-out infinite alternate;
+}
+
+.deferred-spline-frame.is-ready .deferred-spline-loader {
+  opacity: 0;
+}
+
+.deferred-spline-activate {
+  position: absolute;
+  z-index: 7;
+  left: 50%;
+  bottom: 26px;
+  min-height: 44px;
+  padding: 10px 18px;
+  border: 1px solid oklch(0.88 0.006 245 / 0.4);
+  border-radius: 999px;
+  background: oklch(0.14 0.007 250 / 0.84);
+  color: oklch(0.96 0.004 245);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transform: translateX(-50%);
+  pointer-events: auto;
+}
+
+.deferred-spline-interaction {
+  position: absolute;
+  z-index: 9;
+  top: clamp(12px, 1.7vw, 24px);
+  right: clamp(12px, 1.7vw, 24px);
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 13px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
+  background: rgba(8, 9, 11, 0.74);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    0 8px 28px rgba(0, 0, 0, 0.28);
+  color: rgba(255, 255, 255, 0.86);
+  font-family: var(--jost);
+  font-size: 0.56rem;
+  font-weight: 650;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  -webkit-backdrop-filter: blur(12px) saturate(1.15);
+  backdrop-filter: blur(12px) saturate(1.15);
+  cursor: pointer;
+  pointer-events: auto;
+  transition: border-color 180ms ease, background 180ms ease, color 180ms ease;
+}
+
+.deferred-spline-interaction > span {
+  width: 7px;
+  height: 7px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.48);
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.06);
+}
+
+.deferred-spline-interaction:hover,
+.deferred-spline-interaction:focus-visible,
+.deferred-spline-interaction[aria-pressed="true"] {
+  border-color: rgba(255, 255, 255, 0.58);
+  background: rgba(12, 14, 17, 0.9);
+  color: #fff;
+  outline: none;
+}
+
+.deferred-spline-interaction[aria-pressed="true"] > span {
+  background: #fff;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.82);
+}
+
+@keyframes spline-load-progress {
+  from { transform: translateX(-105%); }
+  to { transform: translateX(225%); }
+}
+
+@media (max-width: 700px) {
+  .spline-experience::before,
+  .advisor-spline-stage::after {
+    width: min(52vw, 200px);
+    height: 56px;
+  }
+
+  .deferred-spline-interaction {
+    top: 5px;
+    right: 8px;
+    min-height: 28px;
+    gap: 6px;
+    padding: 5px 9px;
+    border-color: rgba(255, 255, 255, 0.16);
+    font-size: 0.43rem;
+    letter-spacing: 0.1em;
+  }
+
+  .deferred-spline-interaction > span {
+    width: 5px;
+    height: 5px;
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.05);
+  }
 }
 
 .premium-pricing-mark {

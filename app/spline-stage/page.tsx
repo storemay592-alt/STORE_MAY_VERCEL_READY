@@ -27,36 +27,35 @@ export default async function SplineStagePage() {
 
               const hideSplineAttribution = () => {
                 const logo = viewer.shadowRoot?.querySelector("#logo");
-                if (!(logo instanceof HTMLAnchorElement)) return false;
+                if (!(logo instanceof HTMLElement)) return;
+                if (logo.style.getPropertyValue("display") === "none") return;
 
-                logo.removeAttribute("href");
+                observer.disconnect();
+                if (logo instanceof HTMLAnchorElement) logo.removeAttribute("href");
                 logo.setAttribute("aria-hidden", "true");
                 logo.setAttribute("tabindex", "-1");
-                logo.style.pointerEvents = "none";
-                logo.style.display = "none";
-                return true;
+                logo.style.setProperty("pointer-events", "none", "important");
+                logo.style.setProperty("display", "none", "important");
+                logo.style.setProperty("opacity", "0", "important");
+                if (viewer.shadowRoot) {
+                  observer.observe(viewer.shadowRoot, { childList: true, subtree: true });
+                }
               };
-
-              if (hideSplineAttribution()) return;
 
               const stop = () => {
                 window.clearInterval(intervalId);
                 observer.disconnect();
               };
 
-              const intervalId = window.setInterval(() => {
-                if (hideSplineAttribution()) stop();
-              }, 150);
+              // The viewer re-adds / restyles the badge after it hydrates, so
+              // keep enforcing the hidden state instead of stopping on first hit.
+              const intervalId = window.setInterval(hideSplineAttribution, 400);
 
-              const observer = new MutationObserver(() => {
-                if (hideSplineAttribution()) stop();
-              });
+              const observer = new MutationObserver(hideSplineAttribution);
 
-              if (viewer.shadowRoot) {
-                observer.observe(viewer.shadowRoot, { childList: true, subtree: true });
-              }
+              hideSplineAttribution();
 
-              window.setTimeout(stop, 30000);
+              window.setTimeout(stop, 60000);
             });
           `
         }}
