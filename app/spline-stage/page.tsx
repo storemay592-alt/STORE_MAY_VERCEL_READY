@@ -22,27 +22,30 @@ export default async function SplineStagePage() {
         dangerouslySetInnerHTML={{
           __html: `
             customElements.whenDefined("spline-viewer").then(() => {
-              const hideSplineAttribution = () => {
-                const viewer = document.querySelector("spline-viewer");
-                const logo = viewer?.shadowRoot?.querySelector("#logo");
+              const viewer = document.querySelector("spline-viewer");
+              const root = viewer && viewer.shadowRoot;
+              if (!root) return;
 
-                if (!(logo instanceof HTMLAnchorElement)) return false;
+              // A stylesheet inside the shadow root keeps the attribution badge
+              // hidden no matter when the viewer (re)creates it after WebGL init.
+              const style = document.createElement("style");
+              style.textContent =
+                '#logo,a[href*="spline.design"]{display:none!important;pointer-events:none!important;opacity:0!important;}';
+              root.appendChild(style);
 
-                logo.removeAttribute("href");
-                logo.setAttribute("aria-hidden", "true");
-                logo.setAttribute("tabindex", "-1");
-                logo.style.pointerEvents = "none";
-                logo.style.display = "none";
-                return true;
+              const disableLogo = () => {
+                const logo = root.querySelector("#logo");
+                if (logo instanceof HTMLElement) {
+                  logo.setAttribute("aria-hidden", "true");
+                  logo.setAttribute("tabindex", "-1");
+                  if (logo instanceof HTMLAnchorElement) logo.removeAttribute("href");
+                }
               };
 
-              if (hideSplineAttribution()) return;
-
-              const intervalId = window.setInterval(() => {
-                if (hideSplineAttribution()) window.clearInterval(intervalId);
-              }, 100);
-
-              window.setTimeout(() => window.clearInterval(intervalId), 10000);
+              disableLogo();
+              const observer = new MutationObserver(disableLogo);
+              observer.observe(root, { childList: true, subtree: true });
+              window.setTimeout(() => observer.disconnect(), 15000);
             });
           `
         }}

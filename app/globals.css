@@ -3280,18 +3280,6 @@ button {
   touch-action: pan-y pinch-zoom;
 }
 
-.advisor-spline-stage::after {
-  position: absolute;
-  z-index: 4;
-  right: 0;
-  bottom: 0;
-  width: clamp(150px, 24vw, 240px);
-  height: clamp(46px, 7vw, 66px);
-  background: #000;
-  content: "";
-  pointer-events: none;
-}
-
 .advisor-spline-viewer {
   display: block;
   width: 100%;
@@ -5633,8 +5621,7 @@ button {
   }
 
   .advisor-spline-stage::after {
-    width: min(52vw, 190px);
-    height: 52px;
+    display: none;
   }
 }
 
