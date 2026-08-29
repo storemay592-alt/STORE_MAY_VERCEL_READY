@@ -5044,7 +5044,7 @@ button {
   height: 100vh;
   height: 100svh;
   min-height: 480px;
-  padding: 0;
+  padding: 0 clamp(0px, 12vw, 260px);
   overflow: hidden;
   background: #000;
 }
@@ -5320,6 +5320,7 @@ button {
     height: 100vh;
     height: 100svh;
     min-height: 480px;
+    padding: 0;
   }
 
   .premium-pricing-mark {
