@@ -42,7 +42,8 @@ html {
 
 img,
 video,
-canvas {
+canvas,
+iframe {
   max-width: 100%;
 }
 
@@ -54,6 +55,7 @@ body {
   font-size: 16px;
   line-height: 1.6;
   overflow-x: hidden;
+  overscroll-behavior-x: none;
   text-rendering: optimizeLegibility;
 }
 
@@ -252,6 +254,18 @@ button {
   align-items: center;
   justify-content: flex-end;
   gap: 8px;
+}
+
+.premium-store-status {
+  margin-right: 8px;
+  color: oklch(0.34 0.008 250);
+  font-family: var(--montserrat);
+  font-size: 0.56rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  line-height: 1;
+  text-transform: uppercase;
+  white-space: nowrap;
 }
 
 .premium-search,
@@ -961,7 +975,7 @@ button {
 
 .brands {
   position: relative;
-  background: #ffffff;
+  background: #000;
 }
 
 .brand-ticker {
@@ -2320,8 +2334,6 @@ button {
 }
 
 .testimonials-heading {
-  position: relative;
-  z-index: 3;
   display: grid;
   grid-template-columns: minmax(190px, 0.62fr) minmax(0, 1.38fr);
   align-items: end;
@@ -2342,10 +2354,9 @@ button {
   margin: 0;
   font-family: var(--montserrat);
   font-size: clamp(3rem, 5.4vw, 6rem);
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  line-height: 0.9;
-  color: #000;
+  font-weight: 500;
+  letter-spacing: 0.015em;
+  line-height: 0.94;
 }
 
 .testimonial-grid {
@@ -3240,7 +3251,9 @@ button {
 }
 
 .advisor-spline-showcase {
-  min-height: clamp(680px, 56vw, 920px);
+  height: auto;
+  min-height: 0;
+  aspect-ratio: 16 / 9;
   background:
     radial-gradient(circle at 50% 40%, oklch(0.2 0.018 255 / 0.42), transparent 42%),
     oklch(0.035 0.006 250);
@@ -3268,32 +3281,12 @@ button {
 }
 
 .advisor-spline-viewer {
-  position: absolute;
-  inset: 0;
   display: block;
   width: 100%;
   height: 100%;
-  min-height: 100%;
+  min-height: inherit;
   border: 0;
   background: transparent;
-}
-
-.advisor-spline-stage::after {
-  position: absolute;
-  z-index: 4;
-  right: 0;
-  bottom: 0;
-  width: clamp(160px, 22vw, 260px);
-  height: clamp(50px, 6.5vw, 74px);
-  content: "";
-  pointer-events: none;
-  background: radial-gradient(
-    135% 155% at 100% 100%,
-    oklch(0.025 0.005 250) 0%,
-    oklch(0.025 0.005 250 / 0.92) 38%,
-    oklch(0.025 0.005 250 / 0.55) 66%,
-    transparent 100%
-  );
 }
 
 .advisor-whatsapp-button {
@@ -3413,40 +3406,6 @@ button {
   width: 100%;
   height: 100%;
   background: transparent;
-}
-
-/* Embedded Spline landing (my.spline.design): the external page centers and
-   scales its own canvas, so the wrapper just has to be a full-bleed,
-   centered box for it to fill. */
-.spline-embed-page {
-  position: relative;
-  display: grid;
-  place-items: center;
-  background: #000;
-}
-
-.spline-embed-frame {
-  display: block;
-  width: 100%;
-  height: 100%;
-  border: 0;
-  background: transparent;
-}
-
-/* Black corner mask over the "Built with Spline" badge, so the route is
-   clean even if it is opened directly (not only when framed by the home
-   page, which has its own cover). */
-.spline-embed-page::after {
-  content: "";
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  width: clamp(190px, 26vw, 320px);
-  height: clamp(58px, 8vw, 96px);
-  background: #000;
-  -webkit-mask-image: radial-gradient(140% 150% at 100% 100%, #000 58%, transparent 100%);
-  mask-image: radial-gradient(140% 150% at 100% 100%, #000 58%, transparent 100%);
-  pointer-events: none;
 }
 
 .advisor-showcase::after {
@@ -3673,6 +3632,13 @@ button {
   height: auto;
   filter: invert(1) grayscale(1) contrast(1.2);
   mix-blend-mode: screen;
+}
+
+.footer-brand img.footer-brand-cubes {
+  width: clamp(210px, 19vw, 290px);
+  max-width: 100%;
+  filter: none;
+  mix-blend-mode: normal;
 }
 
 .footer-brand > p {
@@ -5075,8 +5041,9 @@ button {
   isolation: isolate;
   display: block;
   width: 100%;
-  height: clamp(480px, 52vw, 720px);
-  min-height: 480px;
+  height: auto;
+  min-height: 0;
+  aspect-ratio: 16 / 9;
   padding: 0;
   overflow: hidden;
   background: #000;
@@ -5105,84 +5072,48 @@ button {
   background: #000;
 }
 
-/* Solid black frame around the embedded 3D scene: if the scene letterboxes
-   or does not reach every edge, these black bands hide the seam / grey bars
-   instead of leaving a mismatched border. */
 .spline-experience::after {
   content: "";
   position: absolute;
   z-index: 3;
   inset: 0;
   background:
-    linear-gradient(90deg, #000 0 2.4%, transparent 6% 94%, #000 97.6% 100%),
-    linear-gradient(180deg, #000 0 2%, transparent 6% 92%, #000 98% 100%);
+    linear-gradient(90deg, #000 0 3.5%, transparent 10% 90%, #000 96.5% 100%),
+    linear-gradient(180deg, #000 0 1px, transparent 7% 88%, #000 100%);
   pointer-events: none;
 }
 
 .spline-experience iframe {
   position: absolute;
   z-index: 1;
-  top: -4px;
-  left: -4px;
+  inset: 0;
   display: block;
-  width: calc(100% + 8px);
-  height: calc(100% + 8px);
+  width: 100%;
+  height: 100%;
   border: 0;
   background: transparent;
 }
 
-/* Cover the "Built with Spline" attribution badge that the 3D viewer
-   paints in its bottom-right corner. The in-scene script also hides it,
-   this is the guaranteed visual fallback. */
-.spline-experience::before {
-  position: absolute;
-  z-index: 4;
-  right: 0;
-  bottom: 0;
-  width: clamp(190px, 26vw, 320px);
-  height: clamp(58px, 8vw, 96px);
-  content: "";
-  pointer-events: none;
-  background: #000;
-  -webkit-mask-image: radial-gradient(140% 150% at 100% 100%, #000 58%, transparent 100%);
-  mask-image: radial-gradient(140% 150% at 100% 100%, #000 58%, transparent 100%);
-}
-
-/* The deferred Spline wrapper carries no size of its own, so give it one:
-   it fills whichever section hosts it and lets the scene / iframe stretch
-   edge to edge instead of collapsing to the iframe's default height. */
 .deferred-spline-frame {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
+  min-width: 0;
   max-width: 100%;
   overflow: clip;
-  background: transparent;
+  contain: strict;
+  background: #000;
   pointer-events: none;
   touch-action: pan-y;
   user-select: none;
 }
 
 .deferred-spline-frame iframe {
-  position: absolute;
-  inset: 0;
-  display: block;
-  width: 100%;
-  height: 100%;
-  border: 0;
-  background: transparent;
+  max-width: 100%;
   opacity: 0;
   pointer-events: none;
   transition: opacity 380ms cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.spline-experience .deferred-spline-frame iframe {
-  top: -4px;
-  left: -4px;
-  inset: auto;
-  width: calc(100% + 8px);
-  height: calc(100% + 8px);
 }
 
 .deferred-spline-frame.is-ready iframe {
@@ -5313,18 +5244,7 @@ button {
   box-shadow: 0 0 10px rgba(255, 255, 255, 0.82);
 }
 
-@keyframes spline-load-progress {
-  from { transform: translateX(-105%); }
-  to { transform: translateX(225%); }
-}
-
 @media (max-width: 700px) {
-  .spline-experience::before,
-  .advisor-spline-stage::after {
-    width: min(52vw, 200px);
-    height: 56px;
-  }
-
   .deferred-spline-interaction {
     top: 5px;
     right: 8px;
@@ -5343,24 +5263,37 @@ button {
   }
 }
 
+@keyframes spline-load-progress {
+  from { transform: translateX(-105%); }
+  to { transform: translateX(225%); }
+}
+
 .premium-pricing-mark {
   position: absolute;
   z-index: 5;
-  left: 50%;
-  bottom: clamp(22px, 3vw, 44px);
-  width: min(940px, 78vw);
-  transform: translateX(-50%);
-  opacity: 0.82;
-  filter:
-    brightness(1.18)
-    drop-shadow(0 2px 12px oklch(0.01 0.002 250 / 0.76));
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  max-width: 100%;
+  min-height: clamp(58px, 6vw, 78px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 32px;
+  background: #000;
+  border: 0;
+  box-shadow: none;
+  transform: none;
+  opacity: 1;
+  filter: none;
   pointer-events: none;
 }
 
 .premium-pricing-mark img {
   display: block;
-  width: 100%;
+  width: min(940px, 100%);
   height: auto;
+  opacity: 0.9;
 }
 
 @keyframes satin-light-sweep {
@@ -5390,8 +5323,14 @@ button {
   }
 
   .premium-pricing-mark {
-    bottom: 20px;
-    width: min(86vw, 520px);
+    bottom: 0;
+    width: 100%;
+    min-height: 54px;
+    padding: 10px 16px;
+    opacity: 1;
+  }
+
+  .premium-pricing-mark img {
     opacity: 0.86;
   }
 }
@@ -5511,14 +5450,42 @@ button {
   }
 }
 
+.spline-experience::before {
+  position: absolute;
+  z-index: 4;
+  right: 0;
+  bottom: 0;
+  width: 220px;
+  height: 66px;
+  background: #000;
+  content: "";
+  pointer-events: none;
+}
+
+@media (max-width: 520px) {
+  .spline-experience::before {
+    width: 204px;
+    height: 70px;
+  }
+}
+
 /* Responsive hero media: serves a device-appropriate master without changing
    the original 3D scenes or their interaction model. */
 .hero-poster {
   position: absolute;
+  z-index: 0;
   inset: 0;
   display: block;
   overflow: hidden;
   background: oklch(0.025 0.004 250);
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 220ms ease, visibility 220ms ease;
+}
+
+.hero-poster.is-hidden {
+  opacity: 0;
+  visibility: hidden;
 }
 
 .hero-poster img {
@@ -5530,28 +5497,39 @@ button {
 }
 
 .hero-video {
-  background: transparent;
+  z-index: 0;
+  background: #000;
 }
 
-@media (max-width: 767px) {
-  /* The video is filmed widescreen (16:9). Instead of forcing it into a
-     tall portrait box (which either crops it or leaves black bars),
-     the hero box itself now matches the video's own shape: full width,
-     height set by that ratio. Result: the complete shot, edge to edge,
-     with nothing cut off and no empty bars. */
+@media (min-width: 901px) {
   .hero {
     width: 100%;
     height: auto;
+    min-height: 0;
     aspect-ratio: 16 / 9;
-    min-height: unset;
+  }
+
+  .hero-video,
+  .hero-poster img {
+    object-fit: contain;
+    transform: none;
+  }
+}
+
+@media (max-width: 900px) and (orientation: portrait) {
+  .hero {
+    width: 100%;
+    height: auto;
+    min-height: 0;
     max-height: none;
+    aspect-ratio: 9 / 16;
   }
 
   .hero-video,
   .hero-poster img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
     object-position: center;
     transform: none;
   }
@@ -5578,14 +5556,94 @@ button {
 
 }
 
-@media (max-width: 767px) and (orientation: landscape) {
+@media (max-width: 900px) and (orientation: landscape) {
   .hero {
-    height: min(72svh, 520px);
-    min-height: 360px;
+    width: 100%;
+    height: auto;
+    min-height: 0;
+    max-height: none;
+    aspect-ratio: 16 / 9;
   }
 
   .hero-video,
   .hero-poster img {
     object-fit: contain;
+  }
+}
+
+/* Keep expensive WebGL work and deep page sections inside their own paint
+   boundaries. Only the Spline currently near the viewport is mounted by the
+   React observer, so scrolling returns immediately to the browser compositor. */
+.authenticity.authenticity--spline,
+.advisor-spline-showcase,
+.advisor-spline-stage {
+  width: 100%;
+  max-width: 100vw;
+  overflow: clip;
+  contain: layout paint;
+}
+
+.categories,
+.testimonials,
+.faq {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 760px;
+}
+
+@media (max-width: 900px) {
+  .authenticity.authenticity--spline {
+    height: auto;
+    min-height: 0;
+    aspect-ratio: 16 / 9;
+  }
+
+  .advisor-showcase.advisor-spline-showcase {
+    height: auto;
+    min-height: 0;
+    aspect-ratio: 16 / 9;
+  }
+
+  .deferred-spline-loader {
+    bottom: 14px;
+  }
+
+  .premium-pricing-mark {
+    width: 100%;
+  }
+
+  .spline-experience::before {
+    right: 0;
+    bottom: 0;
+    display: block;
+    width: min(46vw, 180px);
+    height: 52px;
+    background: #000;
+  }
+
+  .advisor-spline-stage::after {
+    display: none;
+  }
+}
+
+@media (max-width: 1080px) {
+  .premium-store-status {
+    margin-right: 2px;
+  }
+}
+
+@media (max-width: 700px) {
+  .premium-store-status {
+    position: absolute;
+    top: 8px;
+    right: 14px;
+    margin: 0;
+    font-size: 0.47rem;
+    letter-spacing: 0.13em;
+  }
+}
+
+@media (max-width: 700px), (prefers-reduced-motion: reduce) {
+  .deferred-spline-frame iframe {
+    transition-duration: 180ms;
   }
 }

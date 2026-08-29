@@ -22,40 +22,27 @@ export default async function SplineStagePage() {
         dangerouslySetInnerHTML={{
           __html: `
             customElements.whenDefined("spline-viewer").then(() => {
-              const viewer = document.querySelector("spline-viewer");
-              if (!viewer) return;
-
               const hideSplineAttribution = () => {
-                const logo = viewer.shadowRoot?.querySelector("#logo");
-                if (!(logo instanceof HTMLElement)) return;
-                if (logo.style.getPropertyValue("display") === "none") return;
+                const viewer = document.querySelector("spline-viewer");
+                const logo = viewer?.shadowRoot?.querySelector("#logo");
 
-                observer.disconnect();
-                if (logo instanceof HTMLAnchorElement) logo.removeAttribute("href");
+                if (!(logo instanceof HTMLAnchorElement)) return false;
+
+                logo.removeAttribute("href");
                 logo.setAttribute("aria-hidden", "true");
                 logo.setAttribute("tabindex", "-1");
-                logo.style.setProperty("pointer-events", "none", "important");
-                logo.style.setProperty("display", "none", "important");
-                logo.style.setProperty("opacity", "0", "important");
-                if (viewer.shadowRoot) {
-                  observer.observe(viewer.shadowRoot, { childList: true, subtree: true });
-                }
+                logo.style.pointerEvents = "none";
+                logo.style.display = "none";
+                return true;
               };
 
-              const stop = () => {
-                window.clearInterval(intervalId);
-                observer.disconnect();
-              };
+              if (hideSplineAttribution()) return;
 
-              // The viewer re-adds / restyles the badge after it hydrates, so
-              // keep enforcing the hidden state instead of stopping on first hit.
-              const intervalId = window.setInterval(hideSplineAttribution, 400);
+              const intervalId = window.setInterval(() => {
+                if (hideSplineAttribution()) window.clearInterval(intervalId);
+              }, 100);
 
-              const observer = new MutationObserver(hideSplineAttribution);
-
-              hideSplineAttribution();
-
-              window.setTimeout(stop, 60000);
+              window.setTimeout(() => window.clearInterval(intervalId), 10000);
             });
           `
         }}
