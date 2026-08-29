@@ -5195,7 +5195,7 @@ button {
   position: absolute;
   z-index: 9;
   top: clamp(12px, 1.7vw, 24px);
-  right: clamp(12px, 1.7vw, 24px);
+  right: clamp(20px, 4vw, 64px);
   min-height: 38px;
   display: inline-flex;
   align-items: center;
@@ -5247,7 +5247,7 @@ button {
 @media (max-width: 700px) {
   .deferred-spline-interaction {
     top: 5px;
-    right: 8px;
+    right: 16px;
     min-height: 28px;
     gap: 6px;
     padding: 5px 9px;
