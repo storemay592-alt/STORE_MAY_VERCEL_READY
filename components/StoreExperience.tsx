@@ -307,7 +307,7 @@ export default function StoreExperience() {
             </h2>
             <div className="spline-experience">
               <DeferredSplineFrame
-                src="https://my.spline.design/ticktockinteractivelanding-wJWf18UVA2AYcnPzjj5DwcMM/"
+                src="https://my.spline.design/ticktockinteractivelanding-jZqhDrsW9Oog5Ame5pYrUg02/"
                 title="Experiencia interactiva 100% original de Store MAY"
               />
             </div>
