@@ -42,8 +42,7 @@ html {
 
 img,
 video,
-canvas,
-iframe {
+canvas {
   max-width: 100%;
 }
 
@@ -55,7 +54,6 @@ body {
   font-size: 16px;
   line-height: 1.6;
   overflow-x: hidden;
-  overscroll-behavior-x: none;
   text-rendering: optimizeLegibility;
 }
 
@@ -254,18 +252,6 @@ button {
   align-items: center;
   justify-content: flex-end;
   gap: 8px;
-}
-
-.premium-store-status {
-  margin-right: 8px;
-  color: oklch(0.34 0.008 250);
-  font-family: var(--montserrat);
-  font-size: 0.56rem;
-  font-weight: 600;
-  letter-spacing: 0.16em;
-  line-height: 1;
-  text-transform: uppercase;
-  white-space: nowrap;
 }
 
 .premium-search,
@@ -975,7 +961,7 @@ button {
 
 .brands {
   position: relative;
-  background: #000;
+  background: #ffffff;
 }
 
 .brand-ticker {
@@ -2354,9 +2340,9 @@ button {
   margin: 0;
   font-family: var(--montserrat);
   font-size: clamp(3rem, 5.4vw, 6rem);
-  font-weight: 500;
-  letter-spacing: 0.015em;
-  line-height: 0.94;
+  font-weight: 340;
+  letter-spacing: -0.05em;
+  line-height: 0.9;
 }
 
 .testimonial-grid {
@@ -3251,9 +3237,7 @@ button {
 }
 
 .advisor-spline-showcase {
-  height: auto;
-  min-height: 0;
-  aspect-ratio: 16 / 9;
+  min-height: clamp(680px, 56vw, 920px);
   background:
     radial-gradient(circle at 50% 40%, oklch(0.2 0.018 255 / 0.42), transparent 42%),
     oklch(0.035 0.006 250);
@@ -3632,13 +3616,6 @@ button {
   height: auto;
   filter: invert(1) grayscale(1) contrast(1.2);
   mix-blend-mode: screen;
-}
-
-.footer-brand img.footer-brand-cubes {
-  width: clamp(210px, 19vw, 290px);
-  max-width: 100%;
-  filter: none;
-  mix-blend-mode: normal;
 }
 
 .footer-brand > p {
@@ -5041,12 +5018,14 @@ button {
   isolation: isolate;
   display: block;
   width: 100%;
-  height: auto;
-  min-height: 0;
-  aspect-ratio: 16 / 9;
+  height: clamp(480px, 52vw, 720px);
+  min-height: 480px;
   padding: 0;
   overflow: hidden;
-  background: #000;
+  background:
+    linear-gradient(90deg, oklch(0.045 0.004 250 / 0.62) 0%, transparent 40%, oklch(0.045 0.004 250 / 0.18) 100%),
+    linear-gradient(180deg, oklch(0.05 0.004 250 / 0.18) 0%, transparent 50%, oklch(0.035 0.003 250 / 0.68) 100%),
+    url("/images/store-may-satin-background.webp") center / cover no-repeat;
 }
 
 .authenticity.authenticity--spline::before {
@@ -5069,7 +5048,7 @@ button {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background: #000;
+  background: transparent;
 }
 
 .spline-experience::after {
@@ -5078,222 +5057,42 @@ button {
   z-index: 3;
   inset: 0;
   background:
-    linear-gradient(90deg, #000 0 3.5%, transparent 10% 90%, #000 96.5% 100%),
-    linear-gradient(180deg, #000 0 1px, transparent 7% 88%, #000 100%);
+    radial-gradient(circle at 53% 47%, oklch(0.98 0.006 250 / 0.05) 0%, transparent 34%),
+    linear-gradient(90deg, oklch(0.025 0.002 250 / 0.5) 0%, transparent 34% 74%, oklch(0.025 0.002 250 / 0.28) 100%),
+    linear-gradient(180deg, oklch(0.025 0.002 250 / 0.12), transparent 22% 58%, oklch(0.025 0.002 250 / 0.48) 100%);
   pointer-events: none;
 }
 
 .spline-experience iframe {
   position: absolute;
   z-index: 1;
-  inset: 0;
+  top: -4px;
+  left: -4px;
   display: block;
-  width: 100%;
-  height: 100%;
+  width: calc(100% + 8px);
+  height: calc(100% + 8px);
   border: 0;
   background: transparent;
-}
-
-.deferred-spline-frame {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  min-width: 0;
-  max-width: 100%;
-  overflow: clip;
-  contain: strict;
-  background: #000;
-  pointer-events: none;
-  touch-action: pan-y;
-  user-select: none;
-}
-
-.deferred-spline-frame iframe {
-  max-width: 100%;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 380ms cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.deferred-spline-frame.is-ready iframe {
-  opacity: 1;
-}
-
-.deferred-spline-frame.is-interactive {
-  pointer-events: auto;
-  touch-action: none;
-}
-
-.deferred-spline-frame.is-interactive iframe {
-  pointer-events: auto;
-}
-
-.deferred-spline-entry-surface {
-  position: absolute;
-  z-index: 8;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  cursor: grab;
-  pointer-events: auto;
-  touch-action: pan-y;
-}
-
-.deferred-spline-loader {
-  position: absolute;
-  z-index: 6;
-  left: 50%;
-  bottom: 18px;
-  width: 54px;
-  height: 2px;
-  overflow: hidden;
-  border-radius: 999px;
-  background: oklch(0.8 0.006 245 / 0.2);
-  opacity: 0.7;
-  transform: translateX(-50%);
-  transition: opacity 240ms ease;
-}
-
-.deferred-spline-loader::after {
-  position: absolute;
-  inset: 0;
-  width: 45%;
-  border-radius: inherit;
-  background: oklch(0.96 0.004 245 / 0.82);
-  content: "";
-  animation: spline-load-progress 1.15s ease-in-out infinite alternate;
-}
-
-.deferred-spline-frame.is-ready .deferred-spline-loader {
-  opacity: 0;
-}
-
-.deferred-spline-activate {
-  position: absolute;
-  z-index: 7;
-  left: 50%;
-  bottom: 26px;
-  min-height: 44px;
-  padding: 10px 18px;
-  border: 1px solid oklch(0.88 0.006 245 / 0.4);
-  border-radius: 999px;
-  background: oklch(0.14 0.007 250 / 0.84);
-  color: oklch(0.96 0.004 245);
-  font-size: 0.62rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  transform: translateX(-50%);
-  pointer-events: auto;
-}
-
-.deferred-spline-interaction {
-  position: absolute;
-  z-index: 9;
-  top: clamp(12px, 1.7vw, 24px);
-  right: clamp(12px, 1.7vw, 24px);
-  min-height: 38px;
-  display: inline-flex;
-  align-items: center;
-  gap: 9px;
-  padding: 9px 13px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 999px;
-  background: rgba(8, 9, 11, 0.74);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.16),
-    0 8px 28px rgba(0, 0, 0, 0.28);
-  color: rgba(255, 255, 255, 0.86);
-  font-family: var(--jost);
-  font-size: 0.56rem;
-  font-weight: 650;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  white-space: nowrap;
-  -webkit-backdrop-filter: blur(12px) saturate(1.15);
-  backdrop-filter: blur(12px) saturate(1.15);
-  cursor: pointer;
-  pointer-events: auto;
-  transition: border-color 180ms ease, background 180ms ease, color 180ms ease;
-}
-
-.deferred-spline-interaction > span {
-  width: 7px;
-  height: 7px;
-  flex: 0 0 auto;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.48);
-  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.06);
-}
-
-.deferred-spline-interaction:hover,
-.deferred-spline-interaction:focus-visible,
-.deferred-spline-interaction[aria-pressed="true"] {
-  border-color: rgba(255, 255, 255, 0.58);
-  background: rgba(12, 14, 17, 0.9);
-  color: #fff;
-  outline: none;
-}
-
-.deferred-spline-interaction[aria-pressed="true"] > span {
-  background: #fff;
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.82);
-}
-
-@media (max-width: 700px) {
-  .deferred-spline-interaction {
-    top: 5px;
-    right: 8px;
-    min-height: 28px;
-    gap: 6px;
-    padding: 5px 9px;
-    border-color: rgba(255, 255, 255, 0.16);
-    font-size: 0.43rem;
-    letter-spacing: 0.1em;
-  }
-
-  .deferred-spline-interaction > span {
-    width: 5px;
-    height: 5px;
-    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.05);
-  }
-}
-
-@keyframes spline-load-progress {
-  from { transform: translateX(-105%); }
-  to { transform: translateX(225%); }
 }
 
 .premium-pricing-mark {
   position: absolute;
   z-index: 5;
-  left: 0;
-  bottom: 0;
-  width: 100%;
-  max-width: 100%;
-  min-height: clamp(58px, 6vw, 78px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 12px 32px;
-  background: #000;
-  border: 0;
-  box-shadow: none;
-  transform: none;
-  opacity: 1;
-  filter: none;
+  left: 50%;
+  bottom: clamp(22px, 3vw, 44px);
+  width: min(940px, 78vw);
+  transform: translateX(-50%);
+  opacity: 0.82;
+  filter:
+    brightness(1.18)
+    drop-shadow(0 2px 12px oklch(0.01 0.002 250 / 0.76));
   pointer-events: none;
 }
 
 .premium-pricing-mark img {
   display: block;
-  width: min(940px, 100%);
+  width: 100%;
   height: auto;
-  opacity: 0.9;
 }
 
 @keyframes satin-light-sweep {
@@ -5323,14 +5122,8 @@ button {
   }
 
   .premium-pricing-mark {
-    bottom: 0;
-    width: 100%;
-    min-height: 54px;
-    padding: 10px 16px;
-    opacity: 1;
-  }
-
-  .premium-pricing-mark img {
+    bottom: 20px;
+    width: min(86vw, 520px);
     opacity: 0.86;
   }
 }
@@ -5450,42 +5243,14 @@ button {
   }
 }
 
-.spline-experience::before {
-  position: absolute;
-  z-index: 4;
-  right: 0;
-  bottom: 0;
-  width: 220px;
-  height: 66px;
-  background: #000;
-  content: "";
-  pointer-events: none;
-}
-
-@media (max-width: 520px) {
-  .spline-experience::before {
-    width: 204px;
-    height: 70px;
-  }
-}
-
 /* Responsive hero media: serves a device-appropriate master without changing
    the original 3D scenes or their interaction model. */
 .hero-poster {
   position: absolute;
-  z-index: 0;
   inset: 0;
   display: block;
   overflow: hidden;
   background: oklch(0.025 0.004 250);
-  opacity: 1;
-  visibility: visible;
-  transition: opacity 220ms ease, visibility 220ms ease;
-}
-
-.hero-poster.is-hidden {
-  opacity: 0;
-  visibility: hidden;
 }
 
 .hero-poster img {
@@ -5497,39 +5262,28 @@ button {
 }
 
 .hero-video {
-  z-index: 0;
-  background: #000;
+  background: transparent;
 }
 
-@media (min-width: 901px) {
+@media (max-width: 767px) {
+  /* The video is filmed widescreen (16:9). Instead of forcing it into a
+     tall portrait box (which either crops it or leaves black bars),
+     the hero box itself now matches the video's own shape: full width,
+     height set by that ratio. Result: the complete shot, edge to edge,
+     with nothing cut off and no empty bars. */
   .hero {
     width: 100%;
     height: auto;
-    min-height: 0;
     aspect-ratio: 16 / 9;
-  }
-
-  .hero-video,
-  .hero-poster img {
-    object-fit: contain;
-    transform: none;
-  }
-}
-
-@media (max-width: 900px) and (orientation: portrait) {
-  .hero {
-    width: 100%;
-    height: auto;
-    min-height: 0;
+    min-height: unset;
     max-height: none;
-    aspect-ratio: 9 / 16;
   }
 
   .hero-video,
   .hero-poster img {
     width: 100%;
     height: 100%;
-    object-fit: contain;
+    object-fit: cover;
     object-position: center;
     transform: none;
   }
@@ -5556,94 +5310,14 @@ button {
 
 }
 
-@media (max-width: 900px) and (orientation: landscape) {
+@media (max-width: 767px) and (orientation: landscape) {
   .hero {
-    width: 100%;
-    height: auto;
-    min-height: 0;
-    max-height: none;
-    aspect-ratio: 16 / 9;
+    height: min(72svh, 520px);
+    min-height: 360px;
   }
 
   .hero-video,
   .hero-poster img {
     object-fit: contain;
-  }
-}
-
-/* Keep expensive WebGL work and deep page sections inside their own paint
-   boundaries. Only the Spline currently near the viewport is mounted by the
-   React observer, so scrolling returns immediately to the browser compositor. */
-.authenticity.authenticity--spline,
-.advisor-spline-showcase,
-.advisor-spline-stage {
-  width: 100%;
-  max-width: 100vw;
-  overflow: clip;
-  contain: layout paint;
-}
-
-.categories,
-.testimonials,
-.faq {
-  content-visibility: auto;
-  contain-intrinsic-size: auto 760px;
-}
-
-@media (max-width: 900px) {
-  .authenticity.authenticity--spline {
-    height: auto;
-    min-height: 0;
-    aspect-ratio: 16 / 9;
-  }
-
-  .advisor-showcase.advisor-spline-showcase {
-    height: auto;
-    min-height: 0;
-    aspect-ratio: 16 / 9;
-  }
-
-  .deferred-spline-loader {
-    bottom: 14px;
-  }
-
-  .premium-pricing-mark {
-    width: 100%;
-  }
-
-  .spline-experience::before {
-    right: 0;
-    bottom: 0;
-    display: block;
-    width: min(46vw, 180px);
-    height: 52px;
-    background: #000;
-  }
-
-  .advisor-spline-stage::after {
-    display: none;
-  }
-}
-
-@media (max-width: 1080px) {
-  .premium-store-status {
-    margin-right: 2px;
-  }
-}
-
-@media (max-width: 700px) {
-  .premium-store-status {
-    position: absolute;
-    top: 8px;
-    right: 14px;
-    margin: 0;
-    font-size: 0.47rem;
-    letter-spacing: 0.13em;
-  }
-}
-
-@media (max-width: 700px), (prefers-reduced-motion: reduce) {
-  .deferred-spline-frame iframe {
-    transition-duration: 180ms;
   }
 }

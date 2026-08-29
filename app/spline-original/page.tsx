@@ -12,7 +12,7 @@ export default async function SplineOriginalPage() {
         nonce={nonce}
       />
       {createElement("spline-viewer", {
-        url: "https://prod.spline.design/n4ECos8L3-dXpDKi/scene.splinecode",
+        url: "https://prod.spline.design/ycd-O3gUmU6uSvWF/scene.splinecode",
         loading: "lazy",
         renderer: "webgl",
         "aria-label": "Marcas premium, precios inteligentes y productos 100% originales"
