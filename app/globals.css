@@ -2372,7 +2372,7 @@ button {
   display: flex;
   flex-direction: column;
   min-width: 0;
-  min-height: clamp(320px, 27vw, 400px);
+  min-height: clamp(230px, 19vw, 300px);
   padding: clamp(30px, 3vw, 46px);
   overflow: hidden;
   border: 1px solid oklch(0.99 0.003 245 / 0.9);
@@ -4470,7 +4470,7 @@ button {
   }
 
   .testimonial-grid article {
-    min-height: 300px;
+    min-height: 210px;
   }
 
   .testimonial-grid article:nth-child(2),

@@ -307,7 +307,7 @@ export default function StoreExperience() {
             </h2>
             <div className="spline-experience">
               <DeferredSplineFrame
-                src="https://my.spline.design/ticktockinteractivelanding-nb2Si9kAK23qhl7VmMKts2zt/"
+                src="https://my.spline.design/ticktockinteractivelanding-wJWf18UVA2AYcnPzjj5DwcMM/"
                 title="Experiencia interactiva 100% original de Store MAY"
               />
             </div>
@@ -396,7 +396,6 @@ export default function StoreExperience() {
                   <span>{item.number}</span>
                   <h3>{item.title}</h3>
                   <p>{item.copy}</p>
-                  <small>Espacio reservado para una compra verificada</small>
                 </article>
               ))}
             </div>
@@ -469,7 +468,6 @@ export default function StoreExperience() {
           </nav>
           <div className="footer-contact">
             <p>Contacto</p>
-            <a href="#contacto">Atención personalizada</a>
             <a href="#marcas">Nuestras marcas</a>
             <a href="/politicas-compra">Políticas de compra y entregas</a>
             <a href="/privacidad-cookies">Privacidad y cookies</a>
