@@ -90,15 +90,18 @@ export async function POST(request: Request) {
 
     const uploadedPhotos = parseJsonArray(formData.get("uploaded_photos"));
     const assignments = parseJsonArray(formData.get("assignments"));
+    const selectedRowNumbers = parseJsonArray(formData.get("selected_row_numbers"));
     const inventoryOverrides = parseJsonArray(formData.get("inventory_overrides"));
     const classificationOverrides = parseJsonArray(formData.get("classification_overrides"));
     if (
       !uploadedPhotos ||
       !assignments ||
+      !selectedRowNumbers ||
       !inventoryOverrides ||
       !classificationOverrides ||
       uploadedPhotos.length > maximumCatalogMatrixImages ||
       assignments.length > maximumCatalogMatrixImages ||
+      selectedRowNumbers.length > 500 ||
       inventoryOverrides.length > 500 ||
       classificationOverrides.length > 500
     ) {
@@ -109,6 +112,7 @@ export async function POST(request: Request) {
       spreadsheet,
       uploadedPhotos: uploadedPhotos as UploadedProductImageReference[],
       assignments: assignments as CatalogMatrixAssignment[],
+      selectedRowNumbers: selectedRowNumbers as number[],
       inventoryOverrides: inventoryOverrides as CatalogMatrixInventoryOverride[],
       classificationOverrides: classificationOverrides as CatalogMatrixClassificationOverride[],
       duplicateMode,

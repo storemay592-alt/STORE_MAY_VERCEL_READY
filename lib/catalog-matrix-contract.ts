@@ -92,6 +92,7 @@ export type CatalogMatrixUploadPayload = {
   spreadsheet: File;
   uploadedPhotos: UploadedProductImageReference[];
   assignments: CatalogMatrixAssignment[];
+  selectedRowNumbers: number[];
   duplicateMode: "skip" | "create" | "update";
   category: string;
   gender: string;

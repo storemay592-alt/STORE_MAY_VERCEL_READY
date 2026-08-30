@@ -9,6 +9,19 @@ const maximumImageBytes = 5 * 1024 * 1024;
 
 type UploadResult = { url?: string; fileId?: string };
 
+async function fetchWithTimeout(input: RequestInfo | URL, init: RequestInit, timeoutMs: number, timeoutMessage: string) {
+  const controller = new AbortController();
+  const timer = window.setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(input, { ...init, signal: controller.signal });
+  } catch (error) {
+    if (controller.signal.aborted) throw new Error(timeoutMessage);
+    throw error;
+  } finally {
+    window.clearTimeout(timer);
+  }
+}
+
 function validateFiles(files: File[]) {
   if (!files.length) return;
   if (files.length > maximumCatalogMatrixImages) {
@@ -41,10 +54,10 @@ async function uploadOne(
   formData.append("tags", "store-may,producto");
   formData.append("useUniqueFileName", "true");
 
-  const response = await fetch("https://upload.imagekit.io/api/v1/files/upload", {
+  const response = await fetchWithTimeout("https://upload.imagekit.io/api/v1/files/upload", {
     method: "POST",
     body: formData
-  });
+  }, 90_000, `La carga de '${file.name}' tardó demasiado. Comprueba tu conexión e inténtalo otra vez.`);
   const result = (await response.json().catch(() => ({}))) as UploadResult;
   if (!response.ok || !result.url || !result.fileId) {
     throw new Error(`No se pudo subir '${file.name}'. Comprueba tu conexión e inténtalo otra vez.`);
@@ -59,12 +72,12 @@ export async function uploadProductImagesDirectly(
   validateFiles(files);
   if (!files.length) return [];
 
-  const authResponse = await fetch("/api/dashboard/image-upload-auth", {
+  const authResponse = await fetchWithTimeout("/api/dashboard/image-upload-auth", {
     method: "POST",
     credentials: "same-origin",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ count: files.length })
-  });
+  }, 30_000, "La autorización de imágenes tardó demasiado. Recarga el dashboard e inténtalo nuevamente.");
   const auth = (await authResponse.json()) as ProductImageUploadAuthResponse;
   if (!auth.ok) throw new Error(auth.message);
 

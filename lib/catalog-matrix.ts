@@ -387,6 +387,7 @@ export async function uploadCatalogMatrix(input: {
   spreadsheet: File;
   uploadedPhotos: UploadedProductImageReference[];
   assignments: CatalogMatrixAssignment[];
+  selectedRowNumbers: number[];
   inventoryOverrides: CatalogMatrixInventoryOverride[];
   classificationOverrides: CatalogMatrixClassificationOverride[];
   duplicateMode: "skip" | "create" | "update";
@@ -422,9 +423,22 @@ export async function uploadCatalogMatrix(input: {
     const skippedExistingCount = input.duplicateMode === "skip"
       ? validRows.filter((row) => row.existing).length
       : 0;
-    const rowsToImport = input.duplicateMode === "skip"
+    const eligibleRows = input.duplicateMode === "skip"
       ? validRows.filter((row) => !row.existing)
       : validRows;
+    const selectedRowNumbers = new Set<number>();
+    for (const rowNumber of input.selectedRowNumbers) {
+      if (!Number.isInteger(rowNumber) || selectedRowNumbers.has(rowNumber)) {
+        throw new CatalogMatrixError("La selección de productos del lote no es válida.");
+      }
+      selectedRowNumbers.add(rowNumber);
+    }
+    const eligibleRowNumbers = new Set(eligibleRows.map((row) => row.rowNumber));
+    if (!selectedRowNumbers.size || [...selectedRowNumbers].some((rowNumber) => !eligibleRowNumbers.has(rowNumber))) {
+      throw new CatalogMatrixError("Una fotografía está vinculada a un producto que no se puede importar.");
+    }
+    const rowsToImport = eligibleRows.filter((row) => selectedRowNumbers.has(row.rowNumber));
+    const skippedWithoutPhotoCount = eligibleRows.length - rowsToImport.length;
     if (!rowsToImport.length) {
       if (verifiedPhotos.length) await deleteProductImageAssets(fileIds);
       return {
@@ -432,7 +446,7 @@ export async function uploadCatalogMatrix(input: {
         createdCount: 0,
         updatedCount: 0,
         skippedExistingCount,
-        skippedRowCount: rows.length - validRows.length,
+        skippedRowCount: rows.length - validRows.length + skippedWithoutPhotoCount,
         errors: rows.filter((row) => row.errors.length).map((row) => ({ rowNumber: row.rowNumber, errors: row.errors }))
       };
     }
@@ -533,7 +547,7 @@ export async function uploadCatalogMatrix(input: {
       createdCount,
       updatedCount,
       skippedExistingCount,
-      skippedRowCount: rows.length - validRows.length,
+      skippedRowCount: rows.length - validRows.length + skippedWithoutPhotoCount,
       errors: rows
         .filter((row) => row.errors.length)
         .map((row) => ({ rowNumber: row.rowNumber, errors: row.errors }))

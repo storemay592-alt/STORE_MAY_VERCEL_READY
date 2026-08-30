@@ -91,11 +91,13 @@ export function CatalogImportClient() {
       else assignedRows.add(decision.rowNumber);
     }
     const missingRows = importRows.filter((row) => !assignedRows.has(row.rowNumber));
+    const selectedRowNumbers = [...assignedRows];
     return {
       pendingImages,
       ignoredImages,
       missingRows,
-      ready: Boolean(importRows.length) && pendingImages === 0 && missingRows.length === 0
+      selectedRowNumbers,
+      ready: selectedRowNumbers.length > 0 && pendingImages === 0
     };
   }, [decisions, importRows]);
 
@@ -212,17 +214,19 @@ export function CatalogImportClient() {
         imageName: photo.name,
         rowNumber: decisions[normalizedFileName(photo.name)].rowNumber as number
       }));
+      const selectedRows = new Set(reconciliation.selectedRowNumbers);
 
       setProgress("Guardando productos en una sola transacción…");
       const formData = new FormData();
       formData.append("spreadsheet", spreadsheet);
       formData.append("uploaded_photos", JSON.stringify(uploadedPhotos));
       formData.append("assignments", JSON.stringify(assignments));
-      formData.append("inventory_overrides", JSON.stringify(importRows.map((row) => ({
+      formData.append("selected_row_numbers", JSON.stringify(reconciliation.selectedRowNumbers));
+      formData.append("inventory_overrides", JSON.stringify(importRows.filter((row) => selectedRows.has(row.rowNumber)).map((row) => ({
         rowNumber: row.rowNumber,
         state: inventory[row.rowNumber]
       }))));
-      formData.append("classification_overrides", JSON.stringify(importRows.map((row) => ({
+      formData.append("classification_overrides", JSON.stringify(importRows.filter((row) => selectedRows.has(row.rowNumber)).map((row) => ({
         rowNumber: row.rowNumber,
         category: classifications[row.rowNumber]?.category ?? category,
         gender: classifications[row.rowNumber]?.gender ?? gender
@@ -437,7 +441,15 @@ export function CatalogImportClient() {
           ) : null}
 
           <section className={`matrix-confirm-dock ${reconciliation.ready ? "is-ready" : ""}`} aria-live="polite">
-            <div><strong>{reconciliation.ready ? "Lote listo para guardar" : "Faltan decisiones"}</strong><span>{reconciliation.pendingImages ? `${reconciliation.pendingImages} imágenes pendientes. ` : ""}{reconciliation.missingRows.length ? `${reconciliation.missingRows.length} productos sin foto. ` : ""}{reconciliation.ignoredImages ? `${reconciliation.ignoredImages} imágenes ignoradas.` : ""}</span></div>
+            <div>
+              <strong>{reconciliation.ready ? `${reconciliation.selectedRowNumbers.length} productos listos para guardar` : "Faltan decisiones"}</strong>
+              <span>
+                {reconciliation.pendingImages ? `${reconciliation.pendingImages} imágenes pendientes. ` : ""}
+                {reconciliation.ready && reconciliation.missingRows.length ? `${reconciliation.missingRows.length} productos sin foto se omitirán en este lote. ` : ""}
+                {!reconciliation.ready && !reconciliation.pendingImages && !reconciliation.selectedRowNumbers.length ? "Asigna al menos una fotografía a un producto. " : ""}
+                {reconciliation.ignoredImages ? `${reconciliation.ignoredImages} imágenes ignoradas.` : ""}
+              </span>
+            </div>
             <button className="dashboard-button is-primary" type="button" disabled={!reconciliation.ready || phase !== "idle" || Boolean(summary)} onClick={confirmUpload}>
               {phase === "saving" ? progress || "Preparando…" : "Confirmar y subir a base de datos"}
             </button>
@@ -447,7 +459,7 @@ export function CatalogImportClient() {
 
       {summary ? (
         <section className="matrix-import-result" aria-live="polite">
-          <span>Importación terminada</span><h2>{summary.importedCount} productos sincronizados</h2><p>{summary.createdCount} creados, {summary.updatedCount} actualizados, {summary.skippedExistingCount} existentes omitidos y {summary.skippedRowCount} filas bloqueadas.</p>
+          <span>Importación terminada</span><h2>{summary.importedCount} productos sincronizados</h2><p>{summary.createdCount} creados, {summary.updatedCount} actualizados, {summary.skippedExistingCount} existentes omitidos y {summary.skippedRowCount} filas fuera de este lote.</p>
           {summary.errors.length ? <details><summary>Ver filas bloqueadas</summary><ul>{summary.errors.map((item) => <li key={item.rowNumber}>Fila {item.rowNumber}: {item.errors.join(" ")}</li>)}</ul></details> : null}
           <div><a className="dashboard-button is-primary" href="/dashboard">Ver productos</a><button className="dashboard-button is-secondary" type="button" onClick={clearAll}>Importar otro lote</button></div>
         </section>
