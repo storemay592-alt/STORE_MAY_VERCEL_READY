@@ -2,6 +2,7 @@ import type {
   ProductImageUploadAuthResponse,
   UploadedProductImageReference
 } from "@/lib/catalog-import-contract";
+import { maximumCatalogMatrixImages } from "@/lib/catalog-matrix-contract";
 
 const allowedTypes = new Set(["image/jpeg", "image/png", "image/webp", "image/avif"]);
 const maximumImageBytes = 5 * 1024 * 1024;
@@ -10,7 +11,9 @@ type UploadResult = { url?: string; fileId?: string };
 
 function validateFiles(files: File[]) {
   if (!files.length) return;
-  if (files.length > 60) throw new Error("Selecciona hasta 60 imágenes por lote.");
+  if (files.length > maximumCatalogMatrixImages) {
+    throw new Error(`Selecciona hasta ${maximumCatalogMatrixImages} imágenes por lote.`);
+  }
   for (const file of files) {
     if (!allowedTypes.has(file.type)) throw new Error(`La imagen '${file.name}' no tiene un formato válido.`);
     if (!file.size || file.size > maximumImageBytes) {

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { readAdminSession } from "@/lib/auth/session";
 import { createProductImageUploadAuthorizations } from "@/lib/imagekit";
+import { maximumCatalogMatrixImages } from "@/lib/catalog-matrix-contract";
 import { consumeRateLimit } from "@/lib/security/rate-limit";
 import {
   getRequestIdentityFromHeaders,
@@ -38,8 +39,11 @@ export async function POST(request: Request) {
   try {
     const body = (await request.json()) as { count?: unknown };
     const count = Number(body.count);
-    if (!Number.isInteger(count) || count < 1 || count > 60) {
-      return json({ ok: false, message: "Selecciona entre 1 y 60 imágenes." }, 400);
+    if (!Number.isInteger(count) || count < 1 || count > maximumCatalogMatrixImages) {
+      return json(
+        { ok: false, message: `Selecciona entre 1 y ${maximumCatalogMatrixImages} imágenes.` },
+        400
+      );
     }
     return json({ ok: true, ...createProductImageUploadAuthorizations(count) });
   } catch {

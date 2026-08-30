@@ -5,6 +5,7 @@ import type {
   ProductImageUploadAuthorization,
   UploadedProductImageReference
 } from "@/lib/catalog-import-contract";
+import { maximumCatalogMatrixImages } from "@/lib/catalog-matrix-contract";
 
 const allowedImageTypes = new Set(["image/jpeg", "image/png", "image/webp", "image/avif"]);
 const maxImageSize = 5 * 1024 * 1024;
@@ -154,7 +155,7 @@ function safeReference(reference: UploadedProductImageReference) {
 }
 
 export async function verifyProductImageAssets(references: UploadedProductImageReference[]) {
-  if (references.length > 60 || references.some((reference) => !safeReference(reference))) {
+  if (references.length > maximumCatalogMatrixImages || references.some((reference) => !safeReference(reference))) {
     throw new Error("Las referencias de imágenes no son válidas.");
   }
 

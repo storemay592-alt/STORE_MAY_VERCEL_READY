@@ -1,22 +1,26 @@
 import Link from "next/link";
-import { deleteDashboardProductAction } from "@/app/dashboard/actions";
+import { deleteDashboardProductAction, setDashboardProductStatusAction } from "@/app/dashboard/actions";
 import { DashboardDeleteButton } from "@/components/dashboard/DashboardDeleteButton";
 import { verifyAdmin } from "@/lib/auth/dal";
-import { listDashboardProducts, type ProductStatus } from "@/lib/catalog-products";
+import { listDashboardProducts } from "@/lib/catalog-products";
 
 export const dynamic = "force-dynamic";
 
-const statusLabel: Record<ProductStatus, string> = {
-  disponible: "Disponible",
-  agotado: "Agotado",
-  bajo_confirmacion: "Confirmar"
-};
-
 const money = new Intl.NumberFormat("es-US", { style: "currency", currency: "USD" });
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams
+}: {
+  searchParams: Promise<{ buscar?: string }>;
+}) {
   await verifyAdmin();
-  const products = await listDashboardProducts();
+  const allProducts = await listDashboardProducts();
+  const query = (await searchParams).buscar?.trim() ?? "";
+  const normalizedQuery = query.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("es");
+  const products = normalizedQuery
+    ? allProducts.filter((product) => [product.name, product.code, product.brand, product.model, product.article]
+        .some((value) => value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("es").includes(normalizedQuery)))
+    : allProducts;
 
   return (
     <main className="dashboard-page">
@@ -24,13 +28,22 @@ export default async function DashboardPage() {
         <div>
           <span>Catálogo actual</span>
           <h1>Productos</h1>
-          <p>{products.length === 1 ? "1 producto publicado" : `${products.length} productos publicados`}</p>
+          <p>{query ? `${products.length} resultados de ${allProducts.length} productos` : products.length === 1 ? "1 producto publicado" : `${products.length} productos publicados`}</p>
         </div>
         <div className="dashboard-heading-actions">
-          <Link className="dashboard-button is-secondary" href="/dashboard/importar">Importar Excel</Link>
+          <Link className="dashboard-button is-secondary" href="/dashboard/importar">Importar Excel + fotos</Link>
           <Link className="dashboard-button is-primary" href="/dashboard/productos/nuevo">+ Agregar producto</Link>
         </div>
       </section>
+
+      <form className="dashboard-catalog-search" role="search">
+        <label htmlFor="dashboard-product-search">Buscar producto, código, marca o modelo</label>
+        <div>
+          <input id="dashboard-product-search" name="buscar" type="search" defaultValue={query} placeholder="Ej. TERREX CAPTAIN TOEY" />
+          <button type="submit">Buscar</button>
+          {query ? <Link href="/dashboard">Limpiar</Link> : null}
+        </div>
+      </form>
 
       {products.length ? (
         <section className="dashboard-products" aria-label="Lista de productos">
@@ -39,6 +52,7 @@ export default async function DashboardPage() {
           </div>
           {products.map((product) => {
             const remove = deleteDashboardProductAction.bind(null, product.id);
+            const setStatus = setDashboardProductStatusAction.bind(null, product.id);
             return (
               <article className="dashboard-product-row" key={product.id}>
                 <div className="dashboard-product-identity">
@@ -47,7 +61,10 @@ export default async function DashboardPage() {
                 </div>
                 <code>{product.code}</code>
                 <strong className="dashboard-price">{money.format(product.price)}</strong>
-                <span className={`dashboard-status is-${product.status}`}>{statusLabel[product.status]}</span>
+                <form className="dashboard-stock-toggle" action={setStatus} aria-label={`Estado de inventario de ${product.name}`}>
+                  <button className={product.status === "disponible" ? "is-active is-stock" : ""} name="status" value="disponible" type="submit">Stock</button>
+                  <button className={product.status === "agotado" ? "is-active is-sold" : ""} name="status" value="agotado" type="submit">Sold</button>
+                </form>
                 <div className="dashboard-row-actions">
                   <Link className="dashboard-link-button" href={`/dashboard/productos/${product.id}/editar`}>Editar</Link>
                   <DashboardDeleteButton action={remove} productName={product.name} />
@@ -55,6 +72,13 @@ export default async function DashboardPage() {
               </article>
             );
           })}
+        </section>
+      ) : query ? (
+        <section className="dashboard-empty">
+          <span>Sin coincidencias</span>
+          <h2>No encontramos “{query}”.</h2>
+          <p>Prueba con el modelo, la marca o el código del producto.</p>
+          <Link className="dashboard-button is-secondary" href="/dashboard">Mostrar todo el catálogo</Link>
         </section>
       ) : (
         <section className="dashboard-empty">

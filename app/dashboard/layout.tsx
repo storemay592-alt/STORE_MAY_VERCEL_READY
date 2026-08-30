@@ -17,12 +17,13 @@ export default async function DashboardLayout({ children }: { children: React.Re
     <div className="dashboard-shell">
       <header className="dashboard-topbar">
         <Link href={session ? "/dashboard" : "/"} className="dashboard-brand" aria-label="Store MAY">
-          <Image src="/brand/store-may-logo.jpg" alt="Store MAY" width={164} height={76} priority />
+          <Image src="/brand/store-may-cubos.png" alt="Store MAY" width={634} height={283} priority />
         </Link>
         {session ? (
           <>
             <nav className="dashboard-nav" aria-label="Administración">
               <Link href="/dashboard">Productos</Link>
+              <Link href="/dashboard/importar">Importar catálogo</Link>
               <Link href="/dashboard/estadisticas">Estadísticas</Link>
               <Link href="/catalogo" target="_blank">Ver catálogo ↗</Link>
             </nav>

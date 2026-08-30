@@ -113,7 +113,8 @@ export default async function CatalogPage({ searchParams }: { searchParams: Prom
         {products.length ? (
           <section className="catalog-grid" aria-label="Productos del catálogo">
             {products.map((product) => {
-              const commercialPrice = commercialPrices.get(normalizedProductName(product.name));
+              const commercialPrice = product.brandPrice
+                ?? commercialPrices.get(normalizedProductName(product.name));
 
               return (
                 <article className="catalog-card" key={product.id}>

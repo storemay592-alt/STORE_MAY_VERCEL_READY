@@ -196,6 +196,9 @@ export async function updateDashboardProductAction(
 
     await updateCatalogProduct(id, {
       ...parsed.data,
+      article: current.article || parsed.data.type,
+      model: current.model || parsed.data.name,
+      brandPrice: current.brandPrice,
       imageUrls,
       whatsappNumber: current.whatsappNumber || publicWhatsappNumber()
     });
@@ -211,5 +214,34 @@ export async function deleteDashboardProductAction(id: string) {
   await requireAdminAction();
   if (!z.string().uuid().safeParse(id).success) return;
   await deleteCatalogProduct(id);
+  refreshCatalog();
+}
+
+export async function setDashboardProductStatusAction(id: string, formData: FormData) {
+  await assertTrustedActionOrigin();
+  await requireAdminAction();
+  if (!z.string().uuid().safeParse(id).success) return;
+  const parsedStatus = z.enum(["disponible", "agotado"]).safeParse(formData.get("status"));
+  if (!parsedStatus.success) return;
+
+  const current = await getCatalogProductById(id);
+  if (!current || current.status === parsedStatus.data) return;
+  await updateCatalogProduct(id, {
+    name: current.name,
+    description: current.description,
+    brand: current.brand,
+    article: current.article,
+    model: current.model,
+    category: current.category,
+    type: current.type,
+    color: current.color,
+    gender: current.gender,
+    price: current.price,
+    brandPrice: current.brandPrice,
+    sizesAvailable: current.sizesAvailable,
+    status: parsedStatus.data,
+    imageUrls: current.imageUrls,
+    whatsappNumber: current.whatsappNumber
+  });
   refreshCatalog();
 }

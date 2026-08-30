@@ -120,9 +120,43 @@ export default function StoreExperience() {
   const [openFaq, setOpenFaq] = useState(0);
   const [heroSoundEnabled, setHeroSoundEnabled] = useState(false);
   const [heroVideoReady, setHeroVideoReady] = useState(false);
+  const [visitorCount, setVisitorCount] = useState<number | null>(null);
   const heroRef = useRef<HTMLElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const heroSoundEnabledRef = useRef(false);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    const registerVisit = async () => {
+      try {
+        const storageKey = "store-may-visitor-id";
+        let visitorId = window.localStorage.getItem(storageKey);
+        if (!visitorId || !/^[a-zA-Z0-9-]{16,80}$/.test(visitorId)) {
+          const entropy = typeof window.crypto?.getRandomValues === "function"
+            ? Array.from(window.crypto.getRandomValues(new Uint32Array(4)), (value) => value.toString(36)).join("")
+            : `${Date.now().toString(36)}${Math.random().toString(36).slice(2)}${Math.random().toString(36).slice(2)}`;
+          visitorId = `may-${entropy}`.slice(0, 80);
+          window.localStorage.setItem(storageKey, visitorId);
+        }
+        const response = await fetch("/api/visitas", {
+          method: "POST",
+          credentials: "same-origin",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ visitorId }),
+          signal: controller.signal
+        });
+        if (!response.ok) return;
+        const result = await response.json() as { count?: unknown };
+        if (typeof result.count === "number" && Number.isFinite(result.count)) {
+          setVisitorCount(Math.max(0, Math.trunc(result.count)));
+        }
+      } catch {
+        // El contador nunca debe interferir con la experiencia de compra.
+      }
+    };
+    void registerVisit();
+    return () => controller.abort();
+  }, []);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -133,6 +167,7 @@ export default function StoreExperience() {
       connection?: { saveData?: boolean; effectiveType?: string };
     };
     const connection = device.connection;
+    const mobilePortrait = window.matchMedia("(max-width: 900px) and (orientation: portrait)");
     const conserveData =
       window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
       Boolean(connection?.saveData) ||
@@ -153,6 +188,13 @@ export default function StoreExperience() {
       else video.pause();
     };
 
+    const reloadResponsiveSource = () => {
+      setHeroVideoReady(false);
+      video.pause();
+      video.load();
+      window.requestAnimationFrame(startVideo);
+    };
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         heroVisible = entry.isIntersecting;
@@ -165,12 +207,14 @@ export default function StoreExperience() {
     startVideo();
     observer.observe(hero);
     video.addEventListener("canplay", startVideo);
+    mobilePortrait.addEventListener("change", reloadResponsiveSource);
     document.addEventListener("visibilitychange", resumeWhenVisible);
 
     return () => {
       observer.disconnect();
       video.pause();
       video.removeEventListener("canplay", startVideo);
+      mobilePortrait.removeEventListener("change", reloadResponsiveSource);
       document.removeEventListener("visibilitychange", resumeWhenVisible);
     };
   }, []);
@@ -467,6 +511,17 @@ export default function StoreExperience() {
         <div className="section-shell footer-legal">
           <span>© {new Date().getFullYear()} Store MAY</span>
           <span>Catálogo multimarca premium</span>
+          <span
+            className="footer-visitor-counter"
+            aria-label={
+              visitorCount === null
+                ? "Conteo de visitas no disponible"
+                : `${new Intl.NumberFormat("es-EC").format(visitorCount)} visitas registradas`
+            }
+            aria-live="polite"
+          >
+            <strong>{visitorCount === null ? "—" : new Intl.NumberFormat("es-EC").format(visitorCount)}</strong>
+          </span>
         </div>
       </footer>
     </>

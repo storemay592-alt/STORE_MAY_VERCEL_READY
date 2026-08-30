@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createHash } from "node:crypto";
 import { getDatabase } from "@/lib/db";
 import { consumeRateLimit } from "@/lib/security/rate-limit";
 import {
@@ -12,13 +13,42 @@ export const dynamic = "force-dynamic";
 type VisitCountRow = { total: number | string };
 type VisitMemory = typeof globalThis & {
   storeMayVisitorIds?: Set<string>;
+  storeMayVisitLimits?: Map<string, { count: number; startedAt: number }>;
 };
 
 const visitMemory = globalThis as VisitMemory;
 visitMemory.storeMayVisitorIds ??= new Set<string>();
+visitMemory.storeMayVisitLimits ??= new Map();
+
+async function consumeVisitLimit(scope: string, identifier: string, limit: number, windowSeconds: number) {
+  try {
+    return await consumeRateLimit({ scope, identifier, limit, windowSeconds });
+  } catch {
+    const key = `${scope}:${identifier}`;
+    const now = Date.now();
+    const current = visitMemory.storeMayVisitLimits?.get(key);
+    const expired = !current || current.startedAt + windowSeconds * 1000 <= now;
+    const next = expired ? { count: 1, startedAt: now } : { ...current, count: current.count + 1 };
+    visitMemory.storeMayVisitLimits?.set(key, next);
+    return {
+      allowed: next.count <= limit,
+      remaining: Math.max(0, limit - next.count),
+      retryAfter: Math.max(1, Math.ceil((next.startedAt + windowSeconds * 1000 - now) / 1000))
+    };
+  }
+}
 
 function isValidVisitorId(value: unknown): value is string {
   return typeof value === "string" && /^[a-zA-Z0-9-]{16,80}$/.test(value);
+}
+
+function visitFingerprint(headers: Headers) {
+  try {
+    return getRequestIdentityFromHeaders(headers).fingerprint;
+  } catch {
+    const source = `${headers.get("x-forwarded-for") ?? "local"}:${headers.get("user-agent") ?? "unknown"}`;
+    return createHash("sha256").update(source).digest("hex");
+  }
 }
 
 async function persistentCount(visitorId?: string) {
@@ -47,13 +77,8 @@ async function getCount(visitorId?: string) {
 }
 
 export async function GET(request: NextRequest) {
-  const identity = getRequestIdentityFromHeaders(request.headers);
-  const limit = await consumeRateLimit({
-    scope: "site-visits-read",
-    identifier: identity.fingerprint,
-    limit: 120,
-    windowSeconds: 600
-  });
+  const fingerprint = visitFingerprint(request.headers);
+  const limit = await consumeVisitLimit("site-visits-read", fingerprint, 120, 600);
   if (!limit.allowed) {
     return NextResponse.json(
       { error: "Demasiadas solicitudes." },
@@ -70,13 +95,8 @@ export async function POST(request: NextRequest) {
   if (!isTrustedRequestOrigin(request)) {
     return NextResponse.json({ error: "Origen no autorizado." }, { status: 403 });
   }
-  const identity = getRequestIdentityFromHeaders(request.headers);
-  const limit = await consumeRateLimit({
-    scope: "site-visits-write",
-    identifier: identity.fingerprint,
-    limit: 20,
-    windowSeconds: 600
-  });
+  const fingerprint = visitFingerprint(request.headers);
+  const limit = await consumeVisitLimit("site-visits-write", fingerprint, 20, 600);
   if (!limit.allowed) {
     return NextResponse.json(
       { error: "Demasiadas solicitudes." },

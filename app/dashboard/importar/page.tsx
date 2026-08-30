@@ -12,9 +12,9 @@ export default async function CatalogImportPage() {
     <main className="dashboard-page dashboard-import-page">
       <header className="dashboard-editor-heading catalog-import-page-heading">
         <div>
-          <span>Importación masiva</span>
-          <h1>Importar Excel</h1>
-          <p>Agrega varios productos a la vez. Primero revisas; después decides qué guardar.</p>
+          <span>Sincronización de inventario</span>
+          <h1>Excel + imágenes</h1>
+          <p>Empareja la matriz con las fotos, resuelve dudas y guarda sólo cuando todo esté revisado.</p>
         </div>
         <Link className="dashboard-link-button" href="/dashboard">← Volver a productos</Link>
       </header>
@@ -22,4 +22,3 @@ export default async function CatalogImportPage() {
     </main>
   );
 }
-

@@ -66,6 +66,9 @@ export default async function CatalogProductPage({ params }: { params: Promise<{
             <strong className="catalog-detail-price">{money.format(product.price)}</strong>
             <dl className="catalog-attributes">
               <div><dt>Marca</dt><dd>{product.brand}</dd></div>
+              <div><dt>Modelo</dt><dd>{product.model}</dd></div>
+              <div><dt>Artículo</dt><dd>{product.article}</dd></div>
+              {product.brandPrice ? <div><dt>Valor de marca</dt><dd>{money.format(product.brandPrice)}</dd></div> : null}
               <div><dt>Categoría</dt><dd>{product.category}</dd></div>
               <div><dt>Tipo</dt><dd>{product.type}</dd></div>
               <div><dt>Color</dt><dd>{product.color}</dd></div>

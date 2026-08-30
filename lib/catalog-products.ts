@@ -12,11 +12,14 @@ export type CatalogProduct = {
   name: string;
   description: string;
   brand: string;
+  article: string;
+  model: string;
   category: string;
   type: string;
   color: string;
   gender: string;
   price: number;
+  brandPrice: number | null;
   sizesAvailable: string;
   status: ProductStatus;
   imageUrls: string[];
@@ -27,8 +30,12 @@ export type CatalogProduct = {
 
 export type CatalogProductInput = Omit<
   CatalogProduct,
-  "id" | "code" | "createdAt" | "updatedAt"
->;
+  "id" | "code" | "article" | "model" | "brandPrice" | "createdAt" | "updatedAt"
+> & {
+  article?: string;
+  model?: string;
+  brandPrice?: number | null;
+};
 
 type ProductRow = {
   id: string;
@@ -36,11 +43,14 @@ type ProductRow = {
   name: string;
   description: string;
   brand: string;
+  article: string;
+  model: string;
   category: string;
   type: string;
   color: string;
   gender: string;
   price: string | number;
+  brand_price: string | number | null;
   sizes_available: string;
   status: ProductStatus;
   image_urls: string[];
@@ -71,11 +81,14 @@ function mapProduct(row: ProductRow): CatalogProduct {
     name: row.name,
     description: row.description,
     brand: row.brand,
+    article: row.article,
+    model: row.model,
     category: row.category,
     type: row.type,
     color: row.color,
     gender: row.gender,
     price: Number(row.price),
+    brandPrice: row.brand_price === null ? null : Number(row.brand_price),
     sizesAvailable: row.sizes_available,
     status: row.status,
     imageUrls: row.image_urls ?? [],
@@ -86,8 +99,8 @@ function mapProduct(row: ProductRow): CatalogProduct {
 }
 
 const productColumns = `
-  id, code, name, description, brand, category, type, color, gender,
-  price, sizes_available, status, image_urls, whatsapp_number, created_at, updated_at
+  id, code, name, description, brand, article, model, category, type, color, gender,
+  price, brand_price, sizes_available, status, image_urls, whatsapp_number, created_at, updated_at
 `;
 
 export async function listCatalogProducts(filters: ProductFilters = {}) {
@@ -130,15 +143,17 @@ export async function createCatalogProduct(input: CatalogProductInput) {
   const sql = getDatabase();
   const rows = (await sql`
     INSERT INTO products (
-      name, description, brand, category, type, color, gender, price,
-      sizes_available, status, image_urls, whatsapp_number
+      name, description, brand, article, model, category, type, color, gender, price,
+      brand_price, sizes_available, status, image_urls, whatsapp_number
     ) VALUES (
-      ${input.name}, ${input.description}, ${input.brand}, ${input.category}, ${input.type},
-      ${input.color}, ${input.gender}, ${input.price}, ${input.sizesAvailable}, ${input.status},
+      ${input.name}, ${input.description}, ${input.brand}, ${input.article ?? input.type},
+      ${input.model ?? input.name}, ${input.category}, ${input.type}, ${input.color},
+      ${input.gender}, ${input.price}, ${input.brandPrice ?? null}, ${input.sizesAvailable}, ${input.status},
       ${input.imageUrls}, ${input.whatsappNumber}
     )
-    RETURNING id, code, name, description, brand, category, type, color, gender,
-      price, sizes_available, status, image_urls, whatsapp_number, created_at, updated_at
+    RETURNING id, code, name, description, brand, article, model, category, type, color,
+      gender, price, brand_price, sizes_available, status, image_urls, whatsapp_number,
+      created_at, updated_at
   `) as ProductRow[];
   return mapProduct(rows[0]);
 }
@@ -150,18 +165,22 @@ export async function updateCatalogProduct(id: string, input: CatalogProductInpu
     SET name = ${input.name},
         description = ${input.description},
         brand = ${input.brand},
+        article = ${input.article ?? input.type},
+        model = ${input.model ?? input.name},
         category = ${input.category},
         type = ${input.type},
         color = ${input.color},
         gender = ${input.gender},
         price = ${input.price},
+        brand_price = ${input.brandPrice ?? null},
         sizes_available = ${input.sizesAvailable},
         status = ${input.status},
         image_urls = ${input.imageUrls},
         whatsapp_number = ${input.whatsappNumber}
     WHERE id = ${id}
-    RETURNING id, code, name, description, brand, category, type, color, gender,
-      price, sizes_available, status, image_urls, whatsapp_number, created_at, updated_at
+    RETURNING id, code, name, description, brand, article, model, category, type, color,
+      gender, price, brand_price, sizes_available, status, image_urls, whatsapp_number,
+      created_at, updated_at
   `) as ProductRow[];
   return rows.length ? mapProduct(rows[0]) : null;
 }

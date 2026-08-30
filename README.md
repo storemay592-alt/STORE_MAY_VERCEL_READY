@@ -52,6 +52,19 @@ La página queda disponible en `http://localhost:3000`.
 - Catálogo público: `http://localhost:3000/catalogo`
 - Panel privado: `http://localhost:3000/dashboard/login`
 - Estadísticas: `http://localhost:3000/dashboard/estadisticas`
+- Importación Excel + fotos: `http://localhost:3000/dashboard/importar`
+
+La importación masiva usa la plantilla descargable `public/plantillas/plantilla-store-may.xlsx`
+y también acepta la matriz histórica de siete columnas aunque los encabezados estén en las
+primeras diez filas. Si faltan TALLA o ESTADO se usan `Consultar` y `STOCK`, respectivamente.
+El Excel se analiza en el servidor, compara `ARTICULO` y `MODELO` con el nombre de cada foto
+y obliga a revisar cualquier coincidencia menor o igual al 85 %. Las imágenes se envían
+directamente a ImageKit únicamente al confirmar. `STOCK` publica el producto y `SOLD` lo
+guarda como agotado. Al repetir una matriz, el modo predeterminado omite productos existentes
+y solo crea los nuevos; nunca borra ni reemplaza datos sin elegirlo expresamente. El listado
+principal permite buscar por producto, código, marca o modelo y cambiar STOCK/SOLD en línea.
+Después de desplegar esta versión, ejecuta `npm run db:migrate` una vez
+contra la base de datos Neon de producción para añadir `article`, `model` y `brand_price`.
 
 Las rutas anteriores `/admin` y `/admin/login` redirigen al nuevo dashboard.
 
