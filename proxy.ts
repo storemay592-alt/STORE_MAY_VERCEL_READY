@@ -27,7 +27,7 @@ function contentSecurityPolicy(nonce: string, allowEmbeddedScene = false) {
     style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
     img-src 'self' blob: data: ${imageKitOrigin} https://*.imagekit.io https://prod.spline.design;
     font-src 'self' data: https://fonts.gstatic.com;
-    connect-src 'self' https://prod.spline.design https://cdn.spline.design https://www.gstatic.com${isDevelopment ? " ws: wss:" : ""};
+    connect-src 'self' https://upload.imagekit.io https://ik.imagekit.io https://*.imagekit.io https://prod.spline.design https://cdn.spline.design https://www.gstatic.com${isDevelopment ? " ws: wss:" : ""};
     frame-src 'self' https://my.spline.design;
     media-src 'self' blob:;
     worker-src 'self' blob:;
