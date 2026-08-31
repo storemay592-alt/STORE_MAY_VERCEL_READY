@@ -172,6 +172,22 @@ export function CatalogImportClient() {
     }
   }
 
+  function changeDuplicateMode(mode: DuplicateMode) {
+    setDuplicateMode(mode);
+    if (!preview) return;
+    const duplicateRows = new Set(preview.rows.filter((row) => row.duplicate).map((row) => row.rowNumber));
+    setDecisions(Object.fromEntries(preview.imageMatches.map((match) => {
+      const isDup = match.assignedRowNumber !== null && duplicateRows.has(match.assignedRowNumber);
+      const shouldIgnore = isDup && mode === "skip";
+      return [
+        normalizedFileName(match.imageName),
+        shouldIgnore
+          ? { rowNumber: null, confirmed: true, ignored: true }
+          : { rowNumber: match.assignedRowNumber, confirmed: match.status === "matched", ignored: false }
+      ];
+    })));
+  }
+
   function chooseRow(imageName: string, rowNumber: number | null) {
     const key = normalizedFileName(imageName);
     setDecisions((current) => ({
@@ -211,9 +227,14 @@ export function CatalogImportClient() {
 
   function reviewIgnoredImage(imageName: string) {
     const key = normalizedFileName(imageName);
+    const originalMatch = preview?.imageMatches.find((m) => normalizedFileName(m.imageName) === key);
     setDecisions((current) => ({
       ...current,
-      [key]: { rowNumber: null, confirmed: false, ignored: false }
+      [key]: {
+        rowNumber: originalMatch?.assignedRowNumber ?? null,
+        confirmed: originalMatch?.status === "matched",
+        ignored: false
+      }
     }));
   }
 
@@ -389,16 +410,16 @@ export function CatalogImportClient() {
                     <div className="matrix-match-controls">
                       <label className="matrix-assignment-select">
                         <span>Asignar a</span>
-                        <select value={decision.rowNumber ?? ""} disabled={decision.ignored || phase !== "idle"} onChange={(event) => chooseRow(match.imageName, event.target.value ? Number(event.target.value) : null)}>
+                        <select value={decision.rowNumber ?? ""} disabled={phase !== "idle"} onChange={(event) => chooseRow(match.imageName, event.target.value ? Number(event.target.value) : null)}>
                           <option value="">Seleccionar producto…</option>
-                          {importRows.map((row) => <option key={row.rowNumber} value={row.rowNumber}>Fila {row.rowNumber} · {row.label}</option>)}
+                          {allValidRows.map((row) => <option key={row.rowNumber} value={row.rowNumber}>Fila {row.rowNumber} · {row.label}</option>)}
                         </select>
                       </label>
                       <label className="matrix-item-category">
                         <span>Categoría · solo este producto</span>
                         <select
                           aria-label={`Categoría de ${match.imageName}`}
-                          disabled={!assignedRow || decision.ignored || phase !== "idle"}
+                          disabled={!assignedRow || phase !== "idle"}
                           value={assignedRow ? classifications[assignedRow.rowNumber]?.category ?? category : ""}
                           onChange={(event) => assignedRow && chooseCategory(
                             assignedRow.rowNumber,
@@ -471,9 +492,9 @@ export function CatalogImportClient() {
           {preview.duplicateCount ? (
             <fieldset className="matrix-duplicate-choice">
               <legend>Hay {preview.duplicateCount} productos con el mismo nombre y marca</legend>
-              <label><input type="radio" name="matrix-duplicate-mode" checked={duplicateMode === "skip"} onChange={() => setDuplicateMode("skip")} /><span><strong>Importar solo nuevos — recomendado</strong><small>Omite lo que ya existe. No borra ni modifica productos anteriores.</small></span></label>
-              <label><input type="radio" name="matrix-duplicate-mode" checked={duplicateMode === "create"} onChange={() => setDuplicateMode("create")} /><span><strong>Crear copias nuevas</strong><small>Conserva el anterior y crea otro producto.</small></span></label>
-              <label><input type="radio" name="matrix-duplicate-mode" checked={duplicateMode === "update"} onChange={() => setDuplicateMode("update")} /><span><strong>Actualizar existentes</strong><small>Actualiza datos y agrega las nuevas imágenes.</small></span></label>
+              <label><input type="radio" name="matrix-duplicate-mode" checked={duplicateMode === "skip"} onChange={() => changeDuplicateMode("skip")} /><span><strong>Importar solo nuevos — recomendado</strong><small>Omite lo que ya existe. No borra ni modifica productos anteriores.</small></span></label>
+              <label><input type="radio" name="matrix-duplicate-mode" checked={duplicateMode === "create"} onChange={() => changeDuplicateMode("create")} /><span><strong>Crear copias nuevas</strong><small>Conserva el anterior y crea otro producto.</small></span></label>
+              <label><input type="radio" name="matrix-duplicate-mode" checked={duplicateMode === "update"} onChange={() => changeDuplicateMode("update")} /><span><strong>Actualizar existentes</strong><small>Actualiza datos y agrega las nuevas imágenes.</small></span></label>
             </fieldset>
           ) : null}
 
