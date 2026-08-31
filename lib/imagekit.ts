@@ -61,13 +61,16 @@ export function isAllowedStoredImageUrl(value: string) {
     return true;
   }
 
-  const endpoint = process.env.IMAGEKIT_URL_ENDPOINT;
-  if (!endpoint) return false;
   try {
     const candidate = new URL(value);
-    const allowed = new URL(endpoint);
-    const allowedPath = allowed.pathname.endsWith("/") ? allowed.pathname : `${allowed.pathname}/`;
-    return candidate.protocol === "https:" && candidate.origin === allowed.origin && candidate.pathname.startsWith(allowedPath);
+    if (candidate.protocol !== "https:") return false;
+    if (candidate.hostname.endsWith("imagekit.io")) return true;
+    const endpoint = process.env.IMAGEKIT_URL_ENDPOINT;
+    if (endpoint) {
+      const allowed = new URL(endpoint);
+      if (candidate.origin === allowed.origin) return true;
+    }
+    return false;
   } catch {
     return false;
   }
