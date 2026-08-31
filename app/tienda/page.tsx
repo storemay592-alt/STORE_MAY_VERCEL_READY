@@ -8,8 +8,8 @@ import {
   products as editorialProducts,
   type CategoryId
 } from "@/lib/catalog";
+import { listCatalogProducts } from "@/lib/catalog-products";
 import type { ProductCategory } from "@/lib/product-model";
-import { listProducts } from "@/lib/products";
 import { absoluteUrl } from "@/lib/site";
 import "./tienda.css";
 
@@ -76,26 +76,27 @@ const localCatalog: CatalogProduct[] = editorialProducts.map((product) => ({
 
 async function listStorefrontProducts(): Promise<CatalogProduct[]> {
   try {
-    const managedProducts = await listProducts();
-    const managedNames = new Set(
-      managedProducts.map((product) => product.nombre.trim().toLocaleLowerCase("es"))
-    );
-
-    return [
-      ...managedProducts.map((product) => ({
-        ...product,
-        marca: "Selección Store MAY",
-        imagenModeloUrl: null,
-        alt: `${product.nombre} ${product.categoria.toLowerCase()} Store MAY`,
-        precioNota: "Precio disponible bajo consulta",
+    const managedProducts = await listCatalogProducts({ includeSoldOut: true });
+    if (managedProducts.length > 0) {
+      return managedProducts.map((product) => ({
+        id: product.id,
+        nombre: product.name,
+        marca: product.brand || "Store MAY",
+        categoria: (product.category as ProductCategory) || "Mujer",
+        imagenUrl: product.imageUrls[0] || "/brand/store-may-logo.jpg",
+        imagenModeloUrl: product.imageUrls[1] ?? null,
+        alt: `${product.name} ${product.brand} Store MAY`,
+        precioOriginal: product.brandPrice,
+        precioVenta: product.price,
+        precioNota: "Precio Store MAY",
+        tallas: product.sizesAvailable ? product.sizesAvailable.split(",").map((s) => s.trim()).filter(Boolean) : ["Consultar"],
         tallasNota: "Consulta las tallas disponibles para este producto",
+        stock: product.status === "agotado" ? 0 : 1,
         stockExacto: true,
-        href: null
-      })),
-      ...localCatalog.filter(
-        (product) => !managedNames.has(product.nombre.trim().toLocaleLowerCase("es"))
-      )
-    ];
+        href: `/catalogo/${product.code}`
+      }));
+    }
+    return localCatalog;
   } catch {
     return localCatalog;
   }
