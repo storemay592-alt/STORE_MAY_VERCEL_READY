@@ -174,7 +174,9 @@ export async function verifyProductImageAssets(references: UploadedProductImageR
         Boolean(asset.mime && allowedImageTypes.has(asset.mime)) &&
         Boolean(asset.size && asset.size > 0 && asset.size <= maxImageSize) &&
         Boolean(asset.filePath?.startsWith(`${productImageFolder}/`));
-      if (!valid) throw new Error("Una de las imágenes subidas no es válida.");
+      if (!valid) {
+        throw new Error(`Una de las imágenes subidas no es válida. fileId: ${asset.fileId === reference.fileId}, url: ${asset.url === reference.url}, fileType: ${asset.fileType}, mime: ${asset.mime}, size: ${asset.size}, filePath: ${asset.filePath}`);
+      }
       verified.push(reference);
     }
   }

@@ -37,9 +37,9 @@ function safeErrorMessage(error: unknown) {
   if (!(error instanceof Error)) return "No se pudo guardar el catálogo.";
   const allowed = new Set([
     "Las referencias de imágenes no son válidas.",
-    "Una de las imágenes subidas no es válida.",
     "El almacenamiento de imágenes aún no está configurado."
   ]);
+  if (error.message.startsWith("Una de las imágenes subidas no es válida.")) return error.message;
   return allowed.has(error.message)
     ? error.message
     : "No se pudo guardar el catálogo. Ningún producto incompleto fue insertado.";
