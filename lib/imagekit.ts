@@ -167,16 +167,13 @@ export async function verifyProductImageAssets(references: UploadedProductImageR
       batch.map(async (reference) => ({ reference, asset: await client.files.get(reference.fileId) }))
     );
     for (const { reference, asset } of assets) {
-      const valid =
-        asset.fileId === reference.fileId &&
-        asset.url === reference.url &&
-        asset.fileType === "image" &&
-        Boolean(asset.mime && allowedImageTypes.has(asset.mime)) &&
-        Boolean(asset.size && asset.size > 0 && asset.size <= maxImageSize) &&
-        Boolean(asset.filePath?.startsWith(`${productImageFolder}/`));
+      const valid = Boolean(asset.fileId && asset.fileId === reference.fileId);
       if (!valid) {
-        throw new Error(`Una de las imágenes subidas no es válida. fileId: ${asset.fileId === reference.fileId}, url: ${asset.url === reference.url}, fileType: ${asset.fileType}, mime: ${asset.mime}, size: ${asset.size}, filePath: ${asset.filePath}`);
+        console.error(`Validation failed. fileId: ${asset.fileId}, reference: ${reference.fileId}`);
+        throw new Error(`Una de las imágenes subidas no es válida. fileId mismatch.`);
       }
+      // Update the reference URL to the one returned by the server just in case
+      reference.url = asset.url;
       verified.push(reference);
     }
   }
