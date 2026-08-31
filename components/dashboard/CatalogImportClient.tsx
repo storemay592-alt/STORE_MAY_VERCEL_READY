@@ -21,6 +21,13 @@ type RowClassification = {
   gender: (typeof productGenders)[number];
 };
 
+function genderForCategory(
+  category: RowClassification["category"],
+  currentGender: RowClassification["gender"]
+) {
+  return category === "Accesorios" ? currentGender : category;
+}
+
 const matrixColumnLabels: Record<(typeof catalogMatrixColumns)[number], string> = {
   ARTICULO: "Artículo",
   MODELO: "Modelo",
@@ -171,6 +178,19 @@ export function CatalogImportClient() {
       ...current,
       [key]: { rowNumber, confirmed: rowNumber !== null, ignored: false }
     }));
+  }
+
+  function chooseCategory(rowNumber: number, nextCategory: RowClassification["category"]) {
+    setClassifications((current) => {
+      const currentClassification = current[rowNumber] ?? { category, gender };
+      return {
+        ...current,
+        [rowNumber]: {
+          category: nextCategory,
+          gender: genderForCategory(nextCategory, currentClassification.gender)
+        }
+      };
+    });
   }
 
   function confirmSuggestion(imageName: string) {
@@ -356,6 +376,9 @@ export function CatalogImportClient() {
                 const decision = decisions[key] ?? { rowNumber: null, confirmed: false, ignored: false };
                 const resolved = decision.confirmed && decision.rowNumber !== null;
                 const visualStatus = decision.ignored ? "ignored" : resolved ? "matched" : match.status;
+                const assignedRow = decision.rowNumber === null
+                  ? null
+                  : importRows.find((row) => row.rowNumber === decision.rowNumber) ?? null;
                 return (
                   <article className={`matrix-match-row is-${visualStatus}`} key={match.imageName}>
                     <img src={imagePreviews.get(key)} alt={`Vista previa de ${match.imageName}`} />
@@ -363,13 +386,30 @@ export function CatalogImportClient() {
                     <span className={`matrix-match-badge is-${visualStatus}`}>
                       {decision.ignored ? "Ignorada" : resolved && match.status !== "matched" ? "Confirmado" : statusCopy(match.status)}
                     </span>
-                    <label className="matrix-assignment-select">
-                      <span>Asignar a</span>
-                      <select value={decision.rowNumber ?? ""} disabled={decision.ignored || phase !== "idle"} onChange={(event) => chooseRow(match.imageName, event.target.value ? Number(event.target.value) : null)}>
-                        <option value="">Seleccionar producto…</option>
-                        {importRows.map((row) => <option key={row.rowNumber} value={row.rowNumber}>Fila {row.rowNumber} · {row.label}</option>)}
-                      </select>
-                    </label>
+                    <div className="matrix-match-controls">
+                      <label className="matrix-assignment-select">
+                        <span>Asignar a</span>
+                        <select value={decision.rowNumber ?? ""} disabled={decision.ignored || phase !== "idle"} onChange={(event) => chooseRow(match.imageName, event.target.value ? Number(event.target.value) : null)}>
+                          <option value="">Seleccionar producto…</option>
+                          {importRows.map((row) => <option key={row.rowNumber} value={row.rowNumber}>Fila {row.rowNumber} · {row.label}</option>)}
+                        </select>
+                      </label>
+                      <label className="matrix-item-category">
+                        <span>Categoría · solo este producto</span>
+                        <select
+                          aria-label={`Categoría de ${match.imageName}`}
+                          disabled={!assignedRow || decision.ignored || phase !== "idle"}
+                          value={assignedRow ? classifications[assignedRow.rowNumber]?.category ?? category : ""}
+                          onChange={(event) => assignedRow && chooseCategory(
+                            assignedRow.rowNumber,
+                            event.target.value as RowClassification["category"]
+                          )}
+                        >
+                          {!assignedRow ? <option value="">Asigna un producto…</option> : null}
+                          {productCategories.map((item) => <option key={item}>{item}</option>)}
+                        </select>
+                      </label>
+                    </div>
                     <div className="matrix-match-actions">
                       {!decision.confirmed && decision.rowNumber !== null ? <button type="button" onClick={() => confirmSuggestion(match.imageName)}>Confirmar</button> : null}
                       <button type="button" onClick={() => decision.ignored ? reviewIgnoredImage(match.imageName) : ignoreImage(match.imageName)}>{decision.ignored ? "Revisar" : "Ignorar"}</button>
@@ -402,13 +442,10 @@ export function CatalogImportClient() {
                         ) : row.values[column] || "—"}</td>
                       ))}
                       <td>
-                        <select aria-label={`Categoría de la fila ${row.rowNumber}`} disabled={Boolean(row.errors.length)} value={classifications[row.rowNumber]?.category ?? category} onChange={(event) => setClassifications((current) => ({
-                          ...current,
-                          [row.rowNumber]: {
-                            category: event.target.value as RowClassification["category"],
-                            gender: current[row.rowNumber]?.gender ?? gender
-                          }
-                        }))}>
+                        <select aria-label={`Categoría de la fila ${row.rowNumber}`} disabled={Boolean(row.errors.length)} value={classifications[row.rowNumber]?.category ?? category} onChange={(event) => chooseCategory(
+                          row.rowNumber,
+                          event.target.value as RowClassification["category"]
+                        )}>
                           {productCategories.map((item) => <option key={item}>{item}</option>)}
                         </select>
                       </td>

@@ -515,9 +515,11 @@
 .matrix-batch-settings > div:first-child { align-self: center; }
 .matrix-batch-settings h2 { margin-top: 7px; font-size: 1.15rem; }
 .matrix-batch-settings label,
-.matrix-assignment-select { display: grid; gap: 7px; color: var(--dash-muted); font-size: .57rem; font-weight: 750; letter-spacing: .08em; text-transform: uppercase; }
+.matrix-assignment-select,
+.matrix-item-category { display: grid; gap: 7px; color: var(--dash-muted); font-size: .57rem; font-weight: 750; letter-spacing: .08em; text-transform: uppercase; }
 .matrix-batch-settings select,
 .matrix-assignment-select select,
+.matrix-item-category select,
 .matrix-product-table select {
   width: 100%;
   min-height: 40px;
@@ -526,6 +528,10 @@
   color: var(--dash-ink);
   font: inherit;
 }
+.matrix-assignment-select select:focus-visible,
+.matrix-item-category select:focus-visible,
+.matrix-product-table select:focus-visible { outline: 2px solid var(--dash-ink); outline-offset: 2px; }
+.matrix-item-category select:disabled { background: #eceeee; color: var(--dash-muted); cursor: not-allowed; }
 .matrix-import-alert { margin: 0; }
 .matrix-reconciliation,
 .matrix-product-review { overflow: hidden; border: 1px solid var(--dash-line); background: var(--dash-surface); }
@@ -548,7 +554,7 @@
 .matrix-match-list { display: grid; }
 .matrix-match-row {
   display: grid;
-  grid-template-columns: 72px minmax(150px, .85fr) 105px minmax(230px, 1.25fr) auto;
+  grid-template-columns: 72px minmax(150px, .75fr) 105px minmax(390px, 1.7fr) auto;
   align-items: center;
   gap: 16px;
   min-width: 0;
@@ -569,8 +575,10 @@
 .matrix-match-badge.is-review { color: #7d6928; }
 .matrix-match-badge.is-unmatched { color: #913c3c; }
 .matrix-match-badge.is-ignored { color: #666b6e; }
+.matrix-match-controls { display: grid; grid-template-columns: minmax(220px, 1.6fr) minmax(160px, .75fr); gap: 12px; min-width: 0; }
 .matrix-assignment-select { min-width: 0; }
-.matrix-assignment-select select { overflow: hidden; text-overflow: ellipsis; }
+.matrix-assignment-select select,
+.matrix-item-category select { overflow: hidden; text-overflow: ellipsis; }
 .matrix-match-actions { display: flex; justify-content: flex-end; gap: 7px; }
 .matrix-match-actions button { min-height: 34px; padding: 0 12px; border: 1px solid var(--dash-ink); background: transparent; color: var(--dash-ink); font-size: .55rem; font-weight: 750; letter-spacing: .05em; text-transform: uppercase; cursor: pointer; }
 .matrix-match-actions button:first-child { background: var(--dash-ink); color: #fff; }
@@ -625,7 +633,7 @@
   .matrix-batch-settings > div:first-child { grid-column: 1 / -1; }
   .matrix-match-row { grid-template-columns: 64px 1fr 100px; }
   .matrix-match-row img { width: 64px; height: 64px; }
-  .matrix-assignment-select { grid-column: 2 / 4; }
+  .matrix-match-controls { grid-column: 2 / 4; }
   .matrix-match-actions { grid-column: 2 / 4; justify-content: flex-start; }
   .matrix-duplicate-choice { grid-template-columns: 1fr; }
 }
@@ -642,8 +650,9 @@
   .matrix-match-row { grid-template-columns: 54px 1fr; gap: 11px; padding: 14px 12px; }
   .matrix-match-row img { width: 54px; height: 54px; }
   .matrix-match-badge { grid-column: 1; grid-row: 2; }
-  .matrix-assignment-select,
+  .matrix-match-controls,
   .matrix-match-actions { grid-column: 1 / -1; }
+  .matrix-match-controls { grid-template-columns: 1fr; }
   .matrix-match-actions { display: grid; grid-template-columns: 1fr 1fr; }
   .matrix-match-actions button { width: 100%; }
   .matrix-duplicate-choice { grid-template-columns: 1fr; padding: 18px 14px; }
