@@ -64,6 +64,15 @@
 .catalog-card-copy > span { color: var(--catalog-muted); font-size: .54rem; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; }
 .catalog-card-copy h2 { margin: 8px 0 6px; font-family: var(--jost); font-size: 1.18rem; font-weight: 550; line-height: 1.1; }
 .catalog-card-copy p { margin: 0; color: var(--catalog-muted); font-size: .65rem; }
+.catalog-card-copy .catalog-card-description {
+  display: -webkit-box;
+  min-height: 2.9em;
+  margin-top: 8px;
+  overflow: hidden;
+  line-height: 1.45;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
 .catalog-card-prices { display: grid; gap: 6px; margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(17,19,21,.09); }
 .catalog-card-price-line { display: flex; align-items: baseline; gap: 8px; margin: 0; font-variant-numeric: tabular-nums; }
 .catalog-card-price-line > span { color: var(--catalog-muted); font-size: .53rem; font-weight: 700; letter-spacing: .075em; text-transform: uppercase; }

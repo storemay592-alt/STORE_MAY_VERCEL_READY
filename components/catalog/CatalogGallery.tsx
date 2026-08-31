@@ -2,8 +2,18 @@
 
 import { useState } from "react";
 
-export function CatalogGallery({ images, productName }: { images: string[]; productName: string }) {
-  const [activeIndex, setActiveIndex] = useState(0);
+export function CatalogGallery({
+  images,
+  productName,
+  initialIndex = 0
+}: {
+  images: string[];
+  productName: string;
+  initialIndex?: number;
+}) {
+  const [activeIndex, setActiveIndex] = useState(
+    Math.min(Math.max(0, initialIndex), Math.max(0, images.length - 1))
+  );
 
   return (
     <section className="catalog-detail-gallery" aria-label={`Galería de ${productName}`}>

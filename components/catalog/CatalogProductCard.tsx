@@ -13,6 +13,8 @@ const catalogPriceFormatter = new Intl.NumberFormat("es-US", {
 type CatalogProductCardProps = {
   nombre: string;
   marca: string;
+  descripcion: string;
+  fotoReferencia?: string | null;
   imagenUrl: string;
   imagenModeloUrl?: string | null;
   alt: string;
@@ -29,6 +31,8 @@ type CatalogProductCardProps = {
 export function CatalogProductCard({
   nombre,
   marca,
+  descripcion,
+  fotoReferencia,
   imagenUrl,
   imagenModeloUrl,
   alt,
@@ -90,8 +94,9 @@ export function CatalogProductCard({
       </div>
 
       <div className="store-product-copy">
-        <p className="store-product-brand">{marca}</p>
+        <p className="store-product-brand">{marca}{fotoReferencia ? ` · ${fotoReferencia}` : ""}</p>
         <h2>{href ? <Link href={href}>{nombre}</Link> : nombre}</h2>
+        <p className="store-product-description">{descripcion}</p>
 
         <div className="store-product-prices">
           {precioVenta === null ? (

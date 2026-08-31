@@ -25,9 +25,18 @@ export async function generateMetadata({ params }: { params: Promise<{ code: str
   };
 }
 
-export default async function CatalogProductPage({ params }: { params: Promise<{ code: string }> }) {
+export default async function CatalogProductPage({
+  params,
+  searchParams
+}: {
+  params: Promise<{ code: string }>;
+  searchParams: Promise<{ imagen?: string | string[] }>;
+}) {
   const product = await getCatalogProductByCode((await params).code);
   if (!product) notFound();
+  const rawImage = (await searchParams).imagen;
+  const requestedImage = Number(Array.isArray(rawImage) ? rawImage[0] : rawImage);
+  const initialImageIndex = Number.isInteger(requestedImage) ? requestedImage - 1 : 0;
   const message = encodeURIComponent(`Hola, quiero consultar por ${product.name} (código ${product.code})`);
   const number = (product.whatsappNumber || process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "").replace(/\D/g, "");
   const whatsappHref = number ? `https://wa.me/${number}?text=${message}` : `https://api.whatsapp.com/send?text=${message}`;
@@ -60,7 +69,7 @@ export default async function CatalogProductPage({ params }: { params: Promise<{
           <Link href="/">Inicio</Link><span>/</span><Link href="/catalogo">Catálogo</Link><span>/</span><span aria-current="page">{product.code}</span>
         </nav>
         <div className="catalog-detail-layout">
-          <CatalogGallery images={product.imageUrls} productName={product.name} />
+          <CatalogGallery images={product.imageUrls} productName={product.name} initialIndex={initialImageIndex} />
           <section className="catalog-detail-copy">
             <div className="catalog-detail-title"><span>{product.brand} · {product.code}</span><h1>{product.name}</h1><p>{product.description}</p></div>
             <strong className="catalog-detail-price">{money.format(product.price)}</strong>

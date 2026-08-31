@@ -46,6 +46,12 @@ export default async function CatalogPage({ searchParams }: { searchParams: Prom
       (!color || product.color === color) &&
       (!search || searchable.includes(search));
   });
+  const catalogCards = products.flatMap((product) => product.imageUrls.map((imageUrl, imageIndex) => ({
+    product,
+    imageUrl,
+    imageIndex,
+    href: `/catalogo/${product.code}?imagen=${imageIndex + 1}`
+  })));
   const categories = [...new Set(allProducts.map((product) => product.category))].sort();
   const types = [...new Set(allProducts.map((product) => product.type))].sort();
   const colors = [...new Set(allProducts.map((product) => product.color))].sort();
@@ -54,17 +60,18 @@ export default async function CatalogPage({ searchParams }: { searchParams: Prom
     "@context": "https://schema.org",
     "@type": "ItemList",
     name: "Catálogo Store MAY",
-    numberOfItems: products.length,
-    itemListElement: products.map((product, index) => ({
+    numberOfItems: catalogCards.length,
+    itemListElement: catalogCards.map(({ product, imageUrl, href }, index) => ({
       "@type": "ListItem",
       position: index + 1,
       item: {
         "@type": "Product",
         name: product.name,
         sku: product.code,
-        image: product.imageUrls,
+        description: product.description,
+        image: imageUrl,
         brand: { "@type": "Brand", name: product.brand },
-        url: absoluteUrl(`/catalogo/${product.code}`),
+        url: absoluteUrl(href),
         offers: {
           "@type": "Offer",
           priceCurrency: "USD",
@@ -107,25 +114,26 @@ export default async function CatalogPage({ searchParams }: { searchParams: Prom
             <button type="submit">Aplicar filtros</button>
             {category || type || color || search ? <Link href="/catalogo">Limpiar</Link> : null}
           </form>
-          <span>{products.length === 1 ? "1 producto" : `${products.length} productos`}</span>
+          <span>{catalogCards.length === 1 ? "1 foto en catálogo" : `${catalogCards.length} fotos en catálogo`}</span>
         </section>
 
-        {products.length ? (
+        {catalogCards.length ? (
           <section className="catalog-grid" aria-label="Productos del catálogo">
-            {products.map((product) => {
+            {catalogCards.map(({ product, imageUrl, imageIndex, href }) => {
               const commercialPrice = product.brandPrice
                 ?? commercialPrices.get(normalizedProductName(product.name));
 
               return (
-                <article className="catalog-card" key={product.id}>
-                <Link className="catalog-card-image" href={`/catalogo/${product.code}`}>
-                  <img src={product.imageUrls[0]} alt={`${product.type} ${product.gender} ${product.color} Store MAY`} />
+                <article className="catalog-card" key={`${product.id}-foto-${imageIndex + 1}`}>
+                <Link className="catalog-card-image" href={href}>
+                  <img src={imageUrl} alt={`${product.type} ${product.gender} ${product.color}, foto ${imageIndex + 1}, Store MAY`} />
                   {product.status !== "disponible" ? <span>{statusLabels[product.status]}</span> : null}
                 </Link>
                 <div className="catalog-card-copy">
-                  <span>{product.brand} · {product.code}</span>
-                  <h2><Link href={`/catalogo/${product.code}`}>{product.name}</Link></h2>
+                  <span>{product.brand} · {product.code}{product.imageUrls.length > 1 ? ` · Foto ${imageIndex + 1} de ${product.imageUrls.length}` : ""}</span>
+                  <h2><Link href={href}>{product.name}</Link></h2>
                   <p>{product.type} · {product.color}</p>
+                  <p className="catalog-card-description">{product.description || `Modelo ${product.model}`}</p>
                   <div className="catalog-card-prices">
                     {commercialPrice ? (
                       <p className="catalog-card-price-line is-commercial">
@@ -138,7 +146,7 @@ export default async function CatalogPage({ searchParams }: { searchParams: Prom
                       <strong>{money.format(product.price)}</strong>
                     </p>
                   </div>
-                  <Link className="catalog-card-action" href={`/catalogo/${product.code}`}>Ver producto <b>→</b></Link>
+                  <Link className="catalog-card-action" href={href}>Ver producto <b>→</b></Link>
                 </div>
               </article>
               );

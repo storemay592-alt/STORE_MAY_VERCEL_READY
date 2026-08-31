@@ -246,6 +246,18 @@
   text-underline-offset: 4px;
 }
 
+.store-product-description {
+  display: -webkit-box;
+  min-height: 2.9em;
+  margin: 10px 0 0;
+  overflow: hidden;
+  color: oklch(0.45 0.008 250);
+  font-size: 0.63rem;
+  line-height: 1.45;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
 .store-product-prices {
   display: grid;
   gap: 6px;
