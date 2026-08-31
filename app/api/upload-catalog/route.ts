@@ -122,6 +122,10 @@ export async function POST(request: Request) {
     refreshCatalog();
     return json({ ok: true, summary });
   } catch (error) {
+    console.error("[upload-catalog] Error:", error instanceof Error ? error.message : String(error));
+    if (error instanceof Error && error.stack) {
+      console.error("[upload-catalog] Stack:", error.stack.split("\n").slice(0, 5).join(" | "));
+    }
     return json(
       { ok: false, message: safeErrorMessage(error) },
       error instanceof CatalogMatrixError ? 400 : 500
