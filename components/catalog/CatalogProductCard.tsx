@@ -47,9 +47,7 @@ export function CatalogProductCard({
   const commercialLabel =
     stockExacto && stock === 0
       ? "Agotado"
-      : stockExacto && stock > 0 && stock <= 3
-        ? "Últimas unidades"
-        : null;
+      : null;
   const sizeCopy = tallas.length ? `Tallas ${tallas.join(" · ")}` : null;
 
   const updateMediaShape = (event: SyntheticEvent<HTMLImageElement>) => {
