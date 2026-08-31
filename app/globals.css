@@ -5536,7 +5536,7 @@ button {
   background: #000;
 }
 
-@media (min-width: 901px) {
+@media (min-width: 1101px) {
   .hero {
     width: 100%;
     height: auto;
@@ -5551,13 +5551,13 @@ button {
   }
 }
 
-@media (max-width: 900px) and (orientation: portrait) {
+@media (max-width: 1100px) and (orientation: portrait) {
   .hero {
     width: 100%;
-    height: auto;
+    height: calc(100svh - 76px);
     min-height: 0;
     max-height: none;
-    aspect-ratio: 9 / 16;
+    aspect-ratio: auto;
   }
 
   .hero-video,
@@ -5591,13 +5591,13 @@ button {
 
 }
 
-@media (max-width: 900px) and (orientation: landscape) {
+@media (max-width: 1100px) and (orientation: landscape) {
   .hero {
     width: 100%;
-    height: auto;
+    height: calc(100svh - 76px);
     min-height: 0;
     max-height: none;
-    aspect-ratio: 16 / 9;
+    aspect-ratio: auto;
   }
 
   .hero-video,

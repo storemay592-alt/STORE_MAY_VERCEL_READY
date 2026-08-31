@@ -163,24 +163,24 @@ export default function StoreExperience() {
     const hero = heroRef.current;
     if (!video || !hero) return;
 
-    const device = navigator as Navigator & {
-      connection?: { saveData?: boolean; effectiveType?: string };
-    };
-    const connection = device.connection;
-    const mobilePortrait = window.matchMedia("(max-width: 900px) and (orientation: portrait)");
-    const conserveData =
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
-      Boolean(connection?.saveData) ||
-      connection?.effectiveType === "slow-2g" ||
-      connection?.effectiveType === "2g";
+    const mobilePortrait = window.matchMedia("(max-width: 1100px) and (orientation: portrait)");
+    const desktopSource = "/video/store-may-0826-web.mp4";
+    const mobileSource = "/video/store-may-0826-mobile.mp4";
     let heroVisible = true;
-
-    if (conserveData) video.pause();
+    let disposed = false;
 
     const startVideo = () => {
-      if (!heroVisible || document.hidden || (conserveData && !heroSoundEnabledRef.current)) return;
+      if (!heroVisible || document.hidden || disposed) return;
+      video.defaultMuted = true;
       video.muted = !heroSoundEnabledRef.current;
-      video.play().catch(() => undefined);
+      video
+        .play()
+        .then(() => {
+          if (!disposed) setHeroVideoReady(true);
+        })
+        .catch(() => {
+          if (!disposed) setHeroVideoReady(false);
+        });
     };
 
     const resumeWhenVisible = () => {
@@ -189,10 +189,16 @@ export default function StoreExperience() {
     };
 
     const reloadResponsiveSource = () => {
+      const nextSource = mobilePortrait.matches ? mobileSource : desktopSource;
+      if (video.getAttribute("src") === nextSource) {
+        startVideo();
+        return;
+      }
+
       setHeroVideoReady(false);
       video.pause();
+      video.src = nextSource;
       video.load();
-      window.requestAnimationFrame(startVideo);
     };
 
     const observer = new IntersectionObserver(
@@ -204,18 +210,25 @@ export default function StoreExperience() {
       { threshold: 0.08 }
     );
 
-    startVideo();
+    reloadResponsiveSource();
     observer.observe(hero);
     video.addEventListener("canplay", startVideo);
+    video.addEventListener("loadedmetadata", startVideo);
     mobilePortrait.addEventListener("change", reloadResponsiveSource);
     document.addEventListener("visibilitychange", resumeWhenVisible);
+    window.addEventListener("pageshow", startVideo);
+    window.addEventListener("pointerdown", startVideo, { passive: true });
 
     return () => {
+      disposed = true;
       observer.disconnect();
       video.pause();
       video.removeEventListener("canplay", startVideo);
+      video.removeEventListener("loadedmetadata", startVideo);
       mobilePortrait.removeEventListener("change", reloadResponsiveSource);
       document.removeEventListener("visibilitychange", resumeWhenVisible);
+      window.removeEventListener("pageshow", startVideo);
+      window.removeEventListener("pointerdown", startVideo);
     };
   }, []);
 
@@ -267,26 +280,17 @@ export default function StoreExperience() {
           <video
             ref={videoRef}
             className="hero-video"
+            src="/video/store-may-0826-web.mp4"
             autoPlay
             muted={!heroSoundEnabled}
             loop
             playsInline
-            preload="metadata"
+            preload="auto"
             disablePictureInPicture
             aria-label="Presentación audiovisual de Store MAY"
-            onLoadedData={() => setHeroVideoReady(true)}
             onPlaying={() => setHeroVideoReady(true)}
+            onError={() => setHeroVideoReady(false)}
           >
-            <source
-              media="(max-width: 900px) and (orientation: portrait)"
-              src="/video/store-may-0826-mobile.mp4"
-              type="video/mp4"
-            />
-            <source
-              src="/video/store-may-0826-desktop.webm"
-              type="video/webm"
-            />
-            <source src="/video/store-may-0826-web.mp4" type="video/mp4" />
             Tu navegador no admite la reproducción de video.
           </video>
           <span className="hero-video-wash" aria-hidden="true" />
