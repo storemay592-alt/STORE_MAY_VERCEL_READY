@@ -15,6 +15,7 @@ export default async function DashboardPage({
 }) {
   await verifyAdmin();
   const allProducts = await listDashboardProducts();
+  const linkedPhotoCount = allProducts.reduce((total, product) => total + product.imageUrls.length, 0);
   const query = (await searchParams).buscar?.trim() ?? "";
   const normalizedQuery = query.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("es");
   const products = normalizedQuery
@@ -28,7 +29,9 @@ export default async function DashboardPage({
         <div>
           <span>Catálogo actual</span>
           <h1>Productos</h1>
-          <p>{query ? `${products.length} resultados de ${allProducts.length} productos` : products.length === 1 ? "1 producto publicado" : `${products.length} productos publicados`}</p>
+          <p>{query
+            ? `${products.length} resultados de ${allProducts.length} productos · ${linkedPhotoCount} fotos vinculadas`
+            : `${products.length} productos publicados · ${linkedPhotoCount} fotos vinculadas`}</p>
         </div>
         <div className="dashboard-heading-actions">
           <Link className="dashboard-button is-secondary" href="/dashboard/importar">Importar Excel + fotos</Link>

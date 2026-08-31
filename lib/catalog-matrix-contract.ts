@@ -73,6 +73,9 @@ export type CatalogMatrixClassificationOverride = {
 
 export type CatalogMatrixSummary = {
   importedCount: number;
+  uploadedImageCount: number;
+  additionalImageCount: number;
+  missingPhotoCount: number;
   createdCount: number;
   updatedCount: number;
   skippedExistingCount: number;

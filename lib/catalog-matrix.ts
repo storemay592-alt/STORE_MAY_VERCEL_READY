@@ -128,7 +128,7 @@ function parseMatrixRow(rowNumber: number, values: CatalogMatrixRowValues): Pars
   validateRequired(errors, values.ARTICULO, "ARTICULO", 160);
   validateRequired(errors, values.MODELO, "MODELO", 160);
   validateRequired(errors, values.MARCA, "MARCA", 100);
-  validateRequired(errors, values.COLOR, "COLOR", 80);
+  if (values.COLOR.length > 80) errors.push("COLOR es demasiado largo.");
   if (values.TALLA.length > 240) errors.push("TALLA es demasiado largo.");
 
   const brandPrice = parseCurrency(values["V. MARCA"]);
@@ -155,7 +155,7 @@ function parseMatrixRow(rowNumber: number, values: CatalogMatrixRowValues): Pars
     article: values.ARTICULO,
     model: values.MODELO,
     brand: values.MARCA,
-    color: values.COLOR,
+    color: values.COLOR || "No especificado",
     size: values.TALLA || "Consultar",
     brandPrice,
     storePrice,
@@ -291,19 +291,34 @@ function candidateStrings(row: ParsedMatrixRow) {
   ].map(normalizeCatalogMatchText).filter(Boolean);
 }
 
+function containmentConfidence(imageName: string, candidate: string, brand: string) {
+  const imageTokens = imageName.split(" ").filter((token) => token.length >= 3);
+  const candidateTokens = new Set(candidate.split(" ").filter((token) => token.length >= 3));
+  if (!imageTokens.length || !imageTokens.every((token) => candidateTokens.has(token))) return 0;
+
+  if (imageTokens.length >= 2) return 96;
+  const [onlyToken] = imageTokens;
+  const brandTokens = new Set(brand.split(" ").filter(Boolean));
+  return onlyToken.length >= 8 && !brandTokens.has(onlyToken) ? 92 : 0;
+}
+
 function confidenceFor(imageName: string, row: ParsedMatrixRow) {
   const normalizedImage = normalizeCatalogMatchText(imageName);
   if (normalizedImage.length < 2) return 0;
+  const normalizedBrand = normalizeCatalogMatchText(row.brand);
+  const candidates = candidateStrings(row);
   const best = Math.max(
-    ...candidateStrings(row).map((candidate) =>
-      fuzzy(normalizedImage, candidate, {
+    ...candidates.map((candidate) => {
+      const fuzzyScore = fuzzy(normalizedImage, candidate, {
         ignoreCase: true,
         ignoreSymbols: true,
         normalizeWhitespace: true,
         useDamerau: true,
         useSellers: true
-      })
-    )
+      });
+      const partialScore = containmentConfidence(normalizedImage, candidate, normalizedBrand) / 100;
+      return Math.max(fuzzyScore, partialScore);
+    })
   );
   return Math.round(best * 100);
 }
@@ -315,7 +330,11 @@ function matchImages(imageNames: string[], rows: ParsedMatrixRow[]): CatalogMatr
       .map((row) => ({ rowNumber: row.rowNumber, label: row.label, confidence: confidenceFor(imageName, row) }))
       .sort((left, right) => right.confidence - left.confidence || left.rowNumber - right.rowNumber);
     const best = ranked[0];
-    const confidence = best?.confidence ?? 0;
+    const runnerUp = ranked[1];
+    const originalConfidence = best?.confidence ?? 0;
+    const confidence = originalConfidence > 85 && runnerUp && originalConfidence - runnerUp.confidence < 4
+      ? 85
+      : originalConfidence;
     const status = confidence > 85 ? "matched" : confidence >= 60 ? "review" : "unmatched";
     return {
       imageName,
@@ -443,6 +462,9 @@ export async function uploadCatalogMatrix(input: {
       if (verifiedPhotos.length) await deleteProductImageAssets(fileIds);
       return {
         importedCount: 0,
+        uploadedImageCount: 0,
+        additionalImageCount: 0,
+        missingPhotoCount: skippedWithoutPhotoCount,
         createdCount: 0,
         updatedCount: 0,
         skippedExistingCount,
@@ -544,6 +566,9 @@ export async function uploadCatalogMatrix(input: {
 
     return {
       importedCount: rowsToImport.length,
+      uploadedImageCount: verifiedPhotos.length,
+      additionalImageCount: Math.max(0, verifiedPhotos.length - rowsToImport.length),
+      missingPhotoCount: skippedWithoutPhotoCount,
       createdCount,
       updatedCount,
       skippedExistingCount,

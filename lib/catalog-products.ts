@@ -106,7 +106,9 @@ const productColumns = `
 export async function listCatalogProducts(filters: ProductFilters = {}) {
   const sql = getDatabase();
   const rows = (await sql.query(
-    `SELECT ${productColumns} FROM products ORDER BY created_at DESC`
+    `SELECT ${productColumns}
+       FROM products
+      ORDER BY lower(name) ASC, lower(brand) ASC, code ASC`
   )) as ProductRow[];
 
   return rows.map(mapProduct).filter((product) => {

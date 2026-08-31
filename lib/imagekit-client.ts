@@ -9,14 +9,20 @@ const maximumImageBytes = 5 * 1024 * 1024;
 
 type UploadResult = { url?: string; fileId?: string };
 
-async function fetchWithTimeout(input: RequestInfo | URL, init: RequestInit, timeoutMs: number, timeoutMessage: string) {
+async function fetchWithTimeout(
+  input: RequestInfo | URL,
+  init: RequestInit,
+  timeoutMs: number,
+  timeoutMessage: string,
+  networkMessage = "No se pudo conectar. Comprueba tu conexión e inténtalo otra vez."
+) {
   const controller = new AbortController();
   const timer = window.setTimeout(() => controller.abort(), timeoutMs);
   try {
     return await fetch(input, { ...init, signal: controller.signal });
   } catch (error) {
     if (controller.signal.aborted) throw new Error(timeoutMessage);
-    throw error;
+    throw new Error(networkMessage, { cause: error });
   } finally {
     window.clearTimeout(timer);
   }
@@ -57,7 +63,9 @@ async function uploadOne(
   const response = await fetchWithTimeout("https://upload.imagekit.io/api/v1/files/upload", {
     method: "POST",
     body: formData
-  }, 90_000, `La carga de '${file.name}' tardó demasiado. Comprueba tu conexión e inténtalo otra vez.`);
+  }, 90_000,
+  `La carga de '${file.name}' tardó demasiado. Comprueba tu conexión e inténtalo otra vez.`,
+  `No se pudo conectar al subir '${file.name}'. Las fotos completadas se conservarán para el siguiente intento.`);
   const result = (await response.json().catch(() => ({}))) as UploadResult;
   if (!response.ok || !result.url || !result.fileId) {
     throw new Error(`No se pudo subir '${file.name}'. Comprueba tu conexión e inténtalo otra vez.`);
@@ -67,7 +75,8 @@ async function uploadOne(
 
 export async function uploadProductImagesDirectly(
   files: File[],
-  onProgress?: (completed: number, total: number) => void
+  onProgress?: (completed: number, total: number) => void,
+  onUploaded?: (result: UploadedProductImageReference) => void
 ): Promise<UploadedProductImageReference[]> {
   validateFiles(files);
   if (!files.length) return [];
@@ -83,16 +92,12 @@ export async function uploadProductImagesDirectly(
 
   const results: UploadedProductImageReference[] = new Array(files.length);
   let completed = 0;
-  for (let index = 0; index < files.length; index += 3) {
-    const batch = files.slice(index, index + 3);
-    const uploaded = await Promise.all(
-      batch.map((file, batchIndex) => uploadOne(file, auth, index + batchIndex))
-    );
-    uploaded.forEach((result, batchIndex) => {
-      results[index + batchIndex] = result;
-      completed += 1;
-      onProgress?.(completed, files.length);
-    });
+  for (let index = 0; index < files.length; index += 1) {
+    const result = await uploadOne(files[index], auth, index);
+    results[index] = result;
+    completed += 1;
+    onUploaded?.(result);
+    onProgress?.(completed, files.length);
   }
   return results;
 }

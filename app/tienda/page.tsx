@@ -107,12 +107,12 @@ function selectedFilter(value: string | string[] | undefined) {
   return categoryFilters.find((item) => item.slug === slug) ?? categoryFilters[0];
 }
 
-const orderOptions = ["destacados", "precio-asc", "precio-desc", "nombre"] as const;
+const orderOptions = ["nombre", "precio-asc", "precio-desc"] as const;
 type OrderId = (typeof orderOptions)[number];
 
 function selectedOrder(value: string | string[] | undefined): OrderId {
   const order = Array.isArray(value) ? value[0] : value;
-  return orderOptions.includes(order as OrderId) ? (order as OrderId) : "destacados";
+  return orderOptions.includes(order as OrderId) ? (order as OrderId) : "nombre";
 }
 
 function sortProducts(products: CatalogProduct[], order: OrderId) {
@@ -251,10 +251,9 @@ export default async function StorePage({ searchParams }: PageProps) {
             {rawSearch ? <input type="hidden" name="buscar" value={rawSearch} /> : null}
             <label htmlFor="catalog-order">Ordenar por</label>
             <select id="catalog-order" name="ordenar" defaultValue={order}>
-              <option value="destacados">Destacados</option>
+              <option value="nombre">Nombre: A–Z</option>
               <option value="precio-asc">Precio: menor a mayor</option>
               <option value="precio-desc">Precio: mayor a menor</option>
-              <option value="nombre">Nombre</option>
             </select>
             <button type="submit">Aplicar</button>
           </form>

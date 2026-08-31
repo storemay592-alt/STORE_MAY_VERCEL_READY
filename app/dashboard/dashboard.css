@@ -551,6 +551,40 @@
 .matrix-status-summary .is-match { border-color: #9ab9a4; background: #edf5ef; color: #2c6841; }
 .matrix-status-summary .is-review { border-color: #cdbf8d; background: #f8f4e8; color: #756222; }
 .matrix-status-summary .is-unmatched { border-color: #d1a3a3; background: #f9eeee; color: #8b3434; }
+.matrix-reconciliation-totals {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(150px, 1fr));
+  gap: 8px;
+  padding: 16px clamp(18px, 2.5vw, 30px);
+  border-bottom: 1px solid var(--dash-line);
+  background: #eef0f0;
+}
+.matrix-reconciliation-totals span {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 12px 14px;
+  border: 1px solid var(--dash-line);
+  background: var(--dash-surface);
+  color: var(--dash-muted);
+  font-size: .6rem;
+  letter-spacing: .035em;
+  text-transform: uppercase;
+}
+.matrix-reconciliation-totals strong {
+  color: var(--dash-ink);
+  font-family: var(--jost), sans-serif;
+  font-size: 1.35rem;
+  font-weight: 560;
+}
+.matrix-reconciliation-totals .has-missing { border-color: #d1a3a3; background: #f9eeee; color: var(--dash-danger); }
+.matrix-reconciliation-totals p {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--dash-muted);
+  font-size: .62rem;
+  line-height: 1.55;
+}
 .matrix-match-list { display: grid; }
 .matrix-match-row {
   display: grid;
@@ -596,7 +630,35 @@
 .matrix-inventory-toggle button.is-active.is-stock { background: #e8f3eb; color: var(--dash-success); box-shadow: inset 0 0 0 1px rgba(47, 110, 74, .32); }
 .matrix-inventory-toggle button.is-active.is-sold { background: #f6e9e9; color: var(--dash-danger); box-shadow: inset 0 0 0 1px rgba(140, 50, 50, .28); }
 .matrix-row-ready { color: var(--dash-success); font-weight: 750; }
+.matrix-row-missing { color: var(--dash-danger); font-weight: 750; }
 .matrix-duplicate { color: #786724; font-weight: 700; }
+.matrix-missing-photo-list { border-top: 1px solid var(--dash-line); background: #fbf4f4; }
+.matrix-missing-photo-list summary {
+  padding: 18px clamp(18px, 2.5vw, 30px);
+  color: var(--dash-danger);
+  font-size: .67rem;
+  font-weight: 760;
+  cursor: pointer;
+}
+.matrix-missing-photo-list > p {
+  margin: 0;
+  padding: 0 clamp(18px, 2.5vw, 30px) 16px;
+  color: var(--dash-muted);
+  font-size: .62rem;
+  line-height: 1.55;
+}
+.matrix-missing-photo-list ol {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+  padding: 0 clamp(18px, 2.5vw, 30px) 24px calc(clamp(18px, 2.5vw, 30px) + 24px);
+}
+.matrix-missing-photo-list li { padding: 10px 12px; border: 1px solid var(--dash-line); background: #fff; }
+.matrix-missing-photo-list li strong,
+.matrix-missing-photo-list li span { display: block; }
+.matrix-missing-photo-list li strong { font-size: .61rem; line-height: 1.45; }
+.matrix-missing-photo-list li span { margin-top: 4px; color: var(--dash-muted); font-size: .55rem; }
 .matrix-duplicate-choice { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 0; padding: 24px clamp(24px, 3vw, 36px); border: 0; border-top: 1px solid var(--dash-line); }
 .matrix-duplicate-choice legend { width: 100%; padding: 22px clamp(24px, 3vw, 36px) 0; font-family: var(--jost), sans-serif; font-size: 1.05rem; font-weight: 560; }
 .matrix-duplicate-choice label { display: grid; grid-template-columns: auto 1fr; gap: 10px; padding: 16px; border: 1px solid var(--dash-line); background: #f1f2f2; cursor: pointer; }
@@ -647,6 +709,8 @@
   .matrix-review-heading { align-items: flex-start; flex-direction: column; padding: 22px 16px; }
   .matrix-status-summary { width: 100%; display: grid; grid-template-columns: repeat(3, 1fr); }
   .matrix-status-summary span { min-width: 0; padding: 8px; }
+  .matrix-reconciliation-totals { grid-template-columns: 1fr; padding: 14px 12px; }
+  .matrix-reconciliation-totals p { grid-column: auto; }
   .matrix-match-row { grid-template-columns: 54px 1fr; gap: 11px; padding: 14px 12px; }
   .matrix-match-row img { width: 54px; height: 54px; }
   .matrix-match-badge { grid-column: 1; grid-row: 2; }
@@ -657,6 +721,7 @@
   .matrix-match-actions button { width: 100%; }
   .matrix-duplicate-choice { grid-template-columns: 1fr; padding: 18px 14px; }
   .matrix-duplicate-choice legend { padding: 18px 14px 0; }
+  .matrix-missing-photo-list ol { grid-template-columns: 1fr; padding-right: 14px; padding-left: 38px; }
   .matrix-confirm-dock { position: static; align-items: stretch; flex-direction: column; }
   .matrix-confirm-dock .dashboard-button { width: 100%; }
   .matrix-import-result > div { width: 100%; flex-direction: column; }
