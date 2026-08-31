@@ -173,7 +173,7 @@ export async function verifyProductImageAssets(references: UploadedProductImageR
         throw new Error(`Una de las imágenes subidas no es válida. fileId mismatch.`);
       }
       // Update the reference URL to the one returned by the server just in case
-      reference.url = asset.url;
+      reference.url = asset.url ?? reference.url;
       verified.push(reference);
     }
   }
