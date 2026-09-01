@@ -33,6 +33,7 @@ const allowedImageExtensions = new Set(["jpg", "jpeg", "png", "webp", "avif"]);
 type ParsedMatrixRow = CatalogMatrixRow & {
   article: string;
   model: string;
+  material: string;
   brand: string;
   color: string;
   size: string;
@@ -47,6 +48,10 @@ type ExistingProduct = {
   code: string;
   name: string;
   brand: string;
+  model: string;
+  color: string;
+  sizes_available: string;
+  price: string | number;
   image_urls: string[];
 };
 
@@ -84,8 +89,8 @@ function normalizedFileKey(value: string) {
   return value.normalize("NFKC").trim().toLocaleLowerCase("es");
 }
 
-function productKey(name: string, brand: string) {
-  return `${normalizeCatalogMatchText(name)}::${normalizeCatalogMatchText(brand)}`;
+function productIdentityKey(model: string, brand: string, color: string, size: string, price: string | number) {
+  return [model, brand, color, size, Number(price).toFixed(2)].map((value) => normalizeCatalogMatchText(String(value))).join("::");
 }
 
 function parseCurrency(value: string) {
@@ -112,10 +117,37 @@ function parseCurrency(value: string) {
   return Number(normalized);
 }
 
-function matrixValues(row: unknown[]) {
-  return Object.fromEntries(
-    catalogMatrixColumns.map((column, index) => [column, displayValue(row[index])])
-  ) as CatalogMatrixRowValues;
+function productFamily(model: string) {
+  return displayValue(model).split(/\s+/)[0]?.toLocaleUpperCase("es") || "PRODUCTO";
+}
+
+function matrixValues(row: unknown[], startColumn: number, format: "legacy" | "compact") {
+  if (format === "legacy") {
+    return {
+      values: Object.fromEntries(
+        catalogMatrixColumns.map((column, index) => [column, displayValue(row[startColumn + index])])
+      ) as CatalogMatrixRowValues,
+      material: "No especificado",
+      compact: false
+    };
+  }
+
+  const model = displayValue(row[startColumn]);
+  const material = displayValue(row[startColumn + 1]) || "No especificado";
+  return {
+    values: {
+      ARTICULO: `${productFamily(model)} · ${material}`,
+      MODELO: model,
+      MARCA: displayValue(row[startColumn + 2]),
+      COLOR: displayValue(row[startColumn + 3]),
+      TALLA: displayValue(row[startColumn + 4]),
+      "V. MARCA": displayValue(row[startColumn + 5]),
+      "P.ECUA": displayValue(row[startColumn + 6]),
+      ESTADO: displayValue(row[startColumn + 7])
+    },
+    material,
+    compact: true
+  };
 }
 
 function validateRequired(errors: string[], value: string, label: string, maximum: number) {
@@ -123,7 +155,12 @@ function validateRequired(errors: string[], value: string, label: string, maximu
   if (value.length > maximum) errors.push(`${label} es demasiado largo.`);
 }
 
-function parseMatrixRow(rowNumber: number, values: CatalogMatrixRowValues): ParsedMatrixRow {
+function parseMatrixRow(
+  rowNumber: number,
+  values: CatalogMatrixRowValues,
+  material: string,
+  compact: boolean
+): ParsedMatrixRow {
   const errors: string[] = [];
   validateRequired(errors, values.ARTICULO, "ARTICULO", 160);
   validateRequired(errors, values.MODELO, "MODELO", 160);
@@ -145,7 +182,9 @@ function parseMatrixRow(rowNumber: number, values: CatalogMatrixRowValues): Pars
     errors.push("ESTADO debe decir STOCK o SOLD.");
   }
 
-  const productName = [values.ARTICULO, values.MODELO].filter(Boolean).join(" ").trim();
+  const productName = compact
+    ? values.MODELO
+    : [values.ARTICULO, values.MODELO].filter(Boolean).join(" ").trim();
   return {
     rowNumber,
     values,
@@ -154,6 +193,7 @@ function parseMatrixRow(rowNumber: number, values: CatalogMatrixRowValues): Pars
     duplicate: null,
     article: values.ARTICULO,
     model: values.MODELO,
+    material,
     brand: values.MARCA,
     color: values.COLOR || "No especificado",
     size: values.TALLA || "Consultar",
@@ -207,33 +247,43 @@ async function readCatalogMatrix(file: File) {
   }) as unknown[][];
   if (!rows.length) throw new CatalogMatrixError("La matriz está vacía.");
 
-  const requiredHeaders = catalogMatrixColumns.slice(0, 7);
   const normalizedHeaders = (row: unknown[]) => {
-    const values = row.map((value) => displayValue(value).replace(/^\uFEFF/, "").toLocaleUpperCase("es"));
-    while (values.length && !values.at(-1)) values.pop();
-    return values;
+    return row.map((value) => displayValue(value).replace(/^\uFEFF/, "").toLocaleUpperCase("es"));
   };
-  const headerRowIndex = rows.slice(0, 10).findIndex((row) => {
-    const headers = normalizedHeaders(row);
-    const acceptedLength = headers.length === requiredHeaders.length || headers.length === catalogMatrixColumns.length;
-    return acceptedLength && requiredHeaders.every((column, index) => headers[index] === column)
-      && (headers.length === requiredHeaders.length || headers[7] === "ESTADO");
-  });
-  if (headerRowIndex < 0) {
+  const legacyHeaders = ["ARTICULO", "MODELO", "MARCA", "COLOR", "TALLA", "V. MARCA", "P.ECUA"];
+  const compactHeaders = ["MODELO", "MATERIAL", "MARCA", "COLOR", "TALLA", "V. MARCA", "P.ECUA"];
+  let headerLayout: { rowIndex: number; startColumn: number; format: "legacy" | "compact" } | null = null;
+  for (let rowIndex = 0; rowIndex < Math.min(rows.length, 10) && !headerLayout; rowIndex += 1) {
+    const headers = normalizedHeaders(rows[rowIndex]);
+    for (let startColumn = 0; startColumn < headers.length && !headerLayout; startColumn += 1) {
+      for (const schema of [
+        { format: "legacy" as const, headers: legacyHeaders },
+        { format: "compact" as const, headers: compactHeaders }
+      ]) {
+        if (schema.headers.every((column, index) => headers[startColumn + index] === column)) {
+          headerLayout = { rowIndex, startColumn, format: schema.format };
+          break;
+        }
+      }
+    }
+  }
+  if (!headerLayout) {
     throw new CatalogMatrixError(
-      `No se encontraron los encabezados ARTICULO, MODELO, MARCA, COLOR, TALLA, V. MARCA y P.ECUA en las primeras 10 filas.`
+      "No se encontraron los encabezados de tu matriz. Usa ARTICULO/MODELO o MODELO/MATERIAL, seguidos de MARCA, COLOR, TALLA, V. MARCA y P.ECUA."
     );
   }
+  const { rowIndex: headerRowIndex, startColumn, format } = headerLayout;
   if (rows.length - headerRowIndex - 1 > maximumRows) {
     throw new CatalogMatrixError(`Importa como máximo ${maximumRows} productos por matriz.`);
   }
-  const sourceHasInventoryColumn = normalizedHeaders(rows[headerRowIndex]).length === catalogMatrixColumns.length;
+  const headerCells = normalizedHeaders(rows[headerRowIndex]);
+  const sourceHasInventoryColumn = headerCells[startColumn + 7] === "ESTADO";
 
   const formulaRows = new Set<number>();
   const range = sheet["!ref"] ? XLSX.utils.decode_range(sheet["!ref"]) : null;
   if (range) {
     for (let row = headerRowIndex + 1; row <= Math.min(range.e.r, headerRowIndex + maximumRows); row += 1) {
-      for (let column = 0; column < catalogMatrixColumns.length; column += 1) {
+      for (let column = startColumn; column < startColumn + catalogMatrixColumns.length; column += 1) {
         const cell = sheet[XLSX.utils.encode_cell({ r: row, c: column })] as XLSX.CellObject | undefined;
         if (cell?.f) formulaRows.add(row + 1);
       }
@@ -243,11 +293,12 @@ async function readCatalogMatrix(file: File) {
   const parsed: ParsedMatrixRow[] = [];
   for (let index = headerRowIndex + 1; index < rows.length; index += 1) {
     const raw = rows[index] ?? [];
-    if (!raw.slice(0, catalogMatrixColumns.length).some((value) => displayValue(value))) continue;
-    const values = matrixValues(raw);
+    if (!raw.slice(startColumn, startColumn + catalogMatrixColumns.length).some((value) => displayValue(value))) continue;
+    const matrix = matrixValues(raw, startColumn, format);
+    const values = matrix.values;
     if (!values.TALLA) values.TALLA = "Consultar";
     if (!sourceHasInventoryColumn || !values.ESTADO) values.ESTADO = "STOCK";
-    const row = parseMatrixRow(index + 1, values);
+    const row = parseMatrixRow(index + 1, values, matrix.material, matrix.compact);
     if (formulaRows.has(row.rowNumber)) {
       row.errors.push("No uses fórmulas; pega los valores directamente.");
     }
@@ -258,21 +309,22 @@ async function readCatalogMatrix(file: File) {
 }
 
 async function addDuplicateInformation(rows: ParsedMatrixRow[]): Promise<PlannedMatrixRow[]> {
-  const validNames = [...new Set(rows.filter((row) => !row.errors.length).map((row) => row.productName.toLocaleLowerCase("es")))];
-  if (!validNames.length) return rows.map((row) => ({ ...row, existing: null }));
+  if (!rows.some((row) => !row.errors.length)) return rows.map((row) => ({ ...row, existing: null }));
 
   const sql = getDatabase();
   const existing = (await sql.query(
-    `SELECT id, code, name, brand, image_urls
+    `SELECT id, code, name, brand, model, color, sizes_available, price, image_urls
        FROM products
-      WHERE lower(trim(name)) = ANY($1::text[])
       ORDER BY updated_at DESC`,
-    [validNames]
+    []
   )) as ExistingProduct[];
-  const byKey = new Map(existing.map((product) => [productKey(product.name, product.brand), product]));
+  const byKey = new Map(existing.map((product) => [
+    productIdentityKey(product.model, product.brand, product.color, product.sizes_available, product.price),
+    product
+  ]));
 
   return rows.map((row) => {
-    const product = byKey.get(productKey(row.productName, row.brand)) ?? null;
+    const product = byKey.get(productIdentityKey(row.model, row.brand, row.color, row.size, row.storePrice)) ?? null;
     return {
       ...row,
       existing: product,
@@ -325,18 +377,32 @@ function confidenceFor(imageName: string, row: ParsedMatrixRow) {
 
 function matchImages(imageNames: string[], rows: ParsedMatrixRow[]): CatalogMatrixImageMatch[] {
   const validRows = rows.filter((row) => !row.errors.length);
-  return imageNames.map((imageName) => {
+  const candidates = imageNames.map((imageName, originalIndex) => {
     const ranked = validRows
       .map((row) => ({ rowNumber: row.rowNumber, label: row.label, confidence: confidenceFor(imageName, row) }))
       .sort((left, right) => right.confidence - left.confidence || left.rowNumber - right.rowNumber);
-    const best = ranked[0];
-    const runnerUp = ranked[1];
+    return {
+      imageName,
+      originalIndex,
+      ranked,
+      bestConfidence: ranked[0]?.confidence ?? 0,
+      margin: (ranked[0]?.confidence ?? 0) - (ranked[1]?.confidence ?? 0)
+    };
+  }).sort((left, right) => right.bestConfidence - left.bestConfidence || right.margin - left.margin || left.originalIndex - right.originalIndex);
+
+  const usedRows = new Set<number>();
+  const matched = candidates.map(({ imageName, originalIndex, ranked }) => {
+    const available = ranked.filter((candidate) => !usedRows.has(candidate.rowNumber));
+    const best = available[0];
+    const runnerUp = available[1];
     const originalConfidence = best?.confidence ?? 0;
     const confidence = originalConfidence > 85 && runnerUp && originalConfidence - runnerUp.confidence < 4
       ? 85
       : originalConfidence;
-    const status = confidence > 85 ? "matched" : confidence >= 60 ? "review" : "unmatched";
+    const status: CatalogMatrixImageMatch["status"] = confidence > 85 ? "matched" : confidence >= 60 ? "review" : "unmatched";
+    if (status !== "unmatched" && best) usedRows.add(best.rowNumber);
     return {
+      originalIndex,
       imageName,
       assignedRowNumber: status === "unmatched" ? null : (best?.rowNumber ?? null),
       confidence,
@@ -344,6 +410,7 @@ function matchImages(imageNames: string[], rows: ParsedMatrixRow[]): CatalogMatr
       alternatives: ranked.slice(0, 5)
     };
   });
+  return matched.sort((left, right) => left.originalIndex - right.originalIndex).map(({ originalIndex: _, ...match }) => match);
 }
 
 function validateImageNames(imageNames: string[]) {
@@ -392,14 +459,37 @@ function assertCategoryAndGender(category: string, gender: string) {
 
 function assignmentMap(assignments: CatalogMatrixAssignment[]) {
   const result = new Map<string, number>();
+  const assignedRowNumbers = new Set<number>();
   for (const assignment of assignments) {
     const key = normalizedFileKey(assignment.imageName);
-    if (!key || !Number.isInteger(assignment.rowNumber) || result.has(key)) {
+    if (!key || !Number.isInteger(assignment.rowNumber) || result.has(key) || assignedRowNumbers.has(assignment.rowNumber)) {
       throw new CatalogMatrixError("Las asignaciones manuales no son válidas. Vuelve a analizar el lote.");
     }
     result.set(key, assignment.rowNumber);
+    assignedRowNumbers.add(assignment.rowNumber);
   }
   return result;
+}
+
+function uniqueProductNames(rows: PlannedMatrixRow[]) {
+  const baseCounts = new Map<string, number>();
+  for (const row of rows) {
+    const key = normalizeCatalogMatchText(row.productName);
+    baseCounts.set(key, (baseCounts.get(key) ?? 0) + 1);
+  }
+  return new Map<number, string>(rows.map((row): [number, string] => {
+    const baseKey = normalizeCatalogMatchText(row.productName);
+    if ((baseCounts.get(baseKey) ?? 0) === 1) return [row.rowNumber, row.productName];
+    const colorName = `${row.productName} · ${row.color}`;
+    const sameColor = rows.filter((candidate) => (
+      normalizeCatalogMatchText(candidate.productName) === baseKey
+      && normalizeCatalogMatchText(candidate.color) === normalizeCatalogMatchText(row.color)
+    ));
+    if (sameColor.length === 1) return [row.rowNumber, colorName];
+    const sizeName = `${colorName} · Talla ${row.size}`;
+    const sameSize = sameColor.filter((candidate) => normalizeCatalogMatchText(candidate.size) === normalizeCatalogMatchText(row.size));
+    return [row.rowNumber, sameSize.length === 1 ? sizeName : `${sizeName} · Ref. ${row.rowNumber}`];
+  }));
 }
 
 export async function uploadCatalogMatrix(input: {
@@ -489,7 +579,7 @@ export async function uploadCatalogMatrix(input: {
 
     const byRow = new Map(rowsToImport.map((row) => [row.rowNumber, row]));
     const assignedRows = assignmentMap(input.assignments);
-    const urlsByRow = new Map<number, string[]>();
+    const urlByRow = new Map<number, string>();
     const photoByKey = new Map(verifiedPhotos.map((photo) => [normalizedFileKey(photo.originalName), photo]));
 
     if (photoByKey.size !== verifiedPhotos.length || assignedRows.size !== verifiedPhotos.length) {
@@ -500,36 +590,42 @@ export async function uploadCatalogMatrix(input: {
       if (!photo || !byRow.has(rowNumber)) {
         throw new CatalogMatrixError("Una imagen está asignada a una fila que ya no es válida.");
       }
-      const current = urlsByRow.get(rowNumber) ?? [];
-      current.push(photo.url);
-      urlsByRow.set(rowNumber, current);
+      if (urlByRow.has(rowNumber)) {
+        throw new CatalogMatrixError("Cada fotografía debe pertenecer a un producto diferente.");
+      }
+      urlByRow.set(rowNumber, photo.url);
     }
-    const missingPhotoRows = rowsToImport.filter((row) => !(urlsByRow.get(row.rowNumber)?.length));
+    const missingPhotoRows = rowsToImport.filter((row) => !urlByRow.has(row.rowNumber));
     if (missingPhotoRows.length) {
       throw new CatalogMatrixError(
         `Falta asignar una imagen a ${missingPhotoRows.map((row) => `la fila ${row.rowNumber}`).join(", ")}.`
       );
     }
+    if (verifiedPhotos.length !== rowsToImport.length) {
+      throw new CatalogMatrixError("Cada producto debe tener exactamente una fotografía en este lote.");
+    }
 
     const sql = getDatabase();
     const whatsappNumber = publicWhatsappNumber();
+    const productNames = uniqueProductNames(rowsToImport);
     let createdCount = 0;
     let updatedCount = 0;
 
     await sql.transaction((transaction) =>
       rowsToImport.map((row) => {
         const rowClassification = classifications.get(row.rowNumber) ?? classification;
-        const newImages = urlsByRow.get(row.rowNumber) ?? [];
-        const imageUrls = input.duplicateMode === "update" && row.existing
-          ? [...newImages, ...(row.existing.image_urls ?? [])].slice(0, 8)
-          : newImages.slice(0, 8);
+        const imageUrl = urlByRow.get(row.rowNumber);
+        if (!imageUrl) throw new CatalogMatrixError(`Falta la fotografía de la fila ${row.rowNumber}.`);
+        const imageUrls = [imageUrl];
+        const productName = productNames.get(row.rowNumber) ?? row.productName;
+        const description = `Material: ${row.material}. Color: ${row.color}. Talla: ${row.size}.`;
 
         if (input.duplicateMode === "update" && row.existing) {
           updatedCount += 1;
           return transaction`
             UPDATE products
-               SET name = ${row.productName},
-                   description = ${`Modelo ${row.model}`},
+               SET name = ${productName},
+                   description = ${description},
                    brand = ${row.brand},
                    category = ${rowClassification.category},
                    type = ${row.article},
@@ -554,7 +650,7 @@ export async function uploadCatalogMatrix(input: {
             name, description, brand, category, type, article, model, color, gender,
             brand_price, price, sizes_available, status, image_urls, whatsapp_number
           ) VALUES (
-            ${row.productName}, ${`Modelo ${row.model}`}, ${row.brand}, ${rowClassification.category},
+            ${productName}, ${description}, ${row.brand}, ${rowClassification.category},
             ${row.article}, ${row.article}, ${row.model}, ${row.color}, ${rowClassification.gender},
             ${row.brandPrice}, ${row.storePrice}, ${row.size}, ${row.productStatus}, ${imageUrls},
             ${whatsappNumber}
@@ -567,7 +663,7 @@ export async function uploadCatalogMatrix(input: {
     return {
       importedCount: rowsToImport.length,
       uploadedImageCount: verifiedPhotos.length,
-      additionalImageCount: Math.max(0, verifiedPhotos.length - rowsToImport.length),
+      additionalImageCount: 0,
       missingPhotoCount: skippedWithoutPhotoCount,
       createdCount,
       updatedCount,

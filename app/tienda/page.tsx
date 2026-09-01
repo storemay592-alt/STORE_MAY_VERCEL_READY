@@ -58,23 +58,16 @@ const categoryName: Record<CategoryId, ProductCategory> = {
   accesorios: "Accesorios"
 };
 
-const localCatalog: CatalogProduct[] = editorialProducts.flatMap((product) => {
-  const images = [...new Set([
-    product.imagen,
-    product.imagenModelo,
-    ...(product.galeria ?? [])
-  ].filter((image): image is string => Boolean(image)))];
-
-  return images.map((image, imageIndex) => ({
-    id: `${product.id}-foto-${imageIndex + 1}`,
+const localCatalog: CatalogProduct[] = editorialProducts.map((product) => ({
+    id: product.id,
     nombre: product.nombre,
     marca: product.marca,
     descripcion: product.descripcion,
-    fotoReferencia: images.length > 1 ? `Foto ${imageIndex + 1} de ${images.length}` : null,
+    fotoReferencia: null,
     categoria: categoryName[product.categoria],
-    imagenUrl: image,
-    imagenModeloUrl: null,
-    alt: `${product.alt}, foto ${imageIndex + 1}`,
+    imagenUrl: product.imagen,
+    imagenModeloUrl: product.imagenModelo ?? null,
+    alt: product.alt,
     precioOriginal: product.precioOriginal ?? null,
     precioVenta: product.precio,
     precioNota: product.precioNota,
@@ -83,25 +76,22 @@ const localCatalog: CatalogProduct[] = editorialProducts.flatMap((product) => {
     stock: product.disponible ? 1 : 0,
     stockExacto: false,
     href: productPath(product)
-  }));
-});
+}));
 
 async function listStorefrontProducts(): Promise<CatalogProduct[]> {
   try {
     const managedProducts = await listCatalogProducts({ includeSoldOut: true });
     if (managedProducts.length > 0) {
-      return managedProducts.flatMap((product) => product.imageUrls.map((imageUrl, imageIndex) => ({
-        id: `${product.id}-foto-${imageIndex + 1}`,
+      return managedProducts.map((product) => ({
+        id: product.id,
         nombre: product.name,
         marca: product.brand || "Store MAY",
         descripcion: product.description || `Modelo ${product.model}`,
-        fotoReferencia: product.imageUrls.length > 1
-          ? `Foto ${imageIndex + 1} de ${product.imageUrls.length}`
-          : null,
+        fotoReferencia: null,
         categoria: (product.category as ProductCategory) || "Mujer",
-        imagenUrl: imageUrl,
-        imagenModeloUrl: null,
-        alt: `${product.name} ${product.brand} foto ${imageIndex + 1} Store MAY`,
+        imagenUrl: product.imageUrls[0] || "/brand/store-may-logo.jpg",
+        imagenModeloUrl: product.imageUrls[1] ?? null,
+        alt: `${product.name} ${product.brand} Store MAY`,
         precioOriginal: product.brandPrice,
         precioVenta: product.price,
         precioNota: "Precio Store MAY",
@@ -109,8 +99,8 @@ async function listStorefrontProducts(): Promise<CatalogProduct[]> {
         tallasNota: "Consulta las tallas disponibles para este producto",
         stock: product.status === "agotado" ? 0 : 1,
         stockExacto: true,
-        href: `/catalogo/${product.code}?imagen=${imageIndex + 1}`
-      })));
+        href: `/catalogo/${product.code}`
+      }));
     }
     return localCatalog;
   } catch {
@@ -275,7 +265,7 @@ export default async function StorePage({ searchParams }: PageProps) {
           </form>
 
           <span className="store-catalog-count">
-            {products.length === 1 ? "1 foto en catálogo" : `${products.length} fotos en catálogo`}
+            {products.length === 1 ? "1 producto" : `${products.length} productos`}
           </span>
         </section>
 

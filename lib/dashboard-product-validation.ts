@@ -10,12 +10,18 @@ const dashboardProductSchema = z.object({
   color: z.string().trim().min(1, "Escribe el color.").max(80),
   gender: z.enum(productGenders, { message: "Elige un género válido." }),
   price: z.number().finite().min(0, "Escribe un precio válido.").max(99999999.99, "El precio es demasiado alto."),
+  brandPrice: z.number().finite().min(0, "Escribe un precio comercial válido.").max(99999999.99, "El precio comercial es demasiado alto.").nullable(),
   sizesAvailable: z.string().trim().min(1, "Indica las tallas o escribe Consultar.").max(240),
   status: z.enum(productStatuses, { message: "Elige un estado." })
 });
 
 function numberFromForm(value: FormDataEntryValue | null) {
   if (typeof value !== "string" || value.trim() === "") return Number.NaN;
+  return Number(value.replace(",", "."));
+}
+
+function optionalNumberFromForm(value: FormDataEntryValue | null) {
+  if (typeof value !== "string" || value.trim() === "") return null;
   return Number(value.replace(",", "."));
 }
 
@@ -29,6 +35,7 @@ export function validateDashboardProduct(formData: FormData) {
     color: formData.get("color"),
     gender: formData.get("gender"),
     price: numberFromForm(formData.get("price")),
+    brandPrice: optionalNumberFromForm(formData.get("brand_price")),
     sizesAvailable: formData.get("sizes_available"),
     status: formData.get("status")
   });

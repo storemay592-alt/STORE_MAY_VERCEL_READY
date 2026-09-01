@@ -113,12 +113,11 @@ export function CatalogImportClient() {
     const selectedRowNumbers = [...assignedRows].sort((left, right) => left - right);
     return {
       assignedImages,
-      additionalImages: Math.max(0, assignedImages - selectedRowNumbers.length),
       pendingImages,
       ignoredImages,
       missingRows,
       selectedRowNumbers,
-      ready: selectedRowNumbers.length > 0 && pendingImages === 0
+      ready: selectedRowNumbers.length > 0 && pendingImages === 0 && assignedImages === selectedRowNumbers.length
     };
   }, [decisions, importRows]);
 
@@ -205,6 +204,14 @@ export function CatalogImportClient() {
 
   function chooseRow(imageName: string, rowNumber: number | null) {
     const key = normalizedFileName(imageName);
+    const existingOwner = rowNumber === null ? null : Object.entries(decisions).find(([decisionKey, decision]) => (
+      decisionKey !== key && !decision.ignored && decision.rowNumber === rowNumber
+    ));
+    if (existingOwner) {
+      setMessage("Ese producto ya tiene una fotografía asignada. Elige otra fila.");
+      return;
+    }
+    setMessage("");
     setDecisions((current) => ({
       ...current,
       [key]: { rowNumber, confirmed: rowNumber !== null, ignored: false }
@@ -350,7 +357,7 @@ export function CatalogImportClient() {
           <div>
             <p className="matrix-kicker">Matriz de productos</p>
             <h2 id="matrix-file-heading">Carga el Excel</h2>
-            <p>Acepta tu matriz habitual de siete columnas y también la plantilla con ESTADO. El archivo se procesa de forma privada en el servidor.</p>
+            <p>Acepta matrices ARTICULO/MODELO y también tu formato MODELO/MATERIAL. El archivo se procesa de forma privada en el servidor.</p>
             <a className="dashboard-button is-secondary" href="/plantillas/plantilla-store-may.xlsx" download>Descargar plantilla</a>
             <label className={`matrix-file-input ${spreadsheet ? "has-file" : ""}`}>
               <span>{spreadsheet ? "Matriz seleccionada" : "Seleccionar .xlsx o .csv"}</span>
@@ -429,11 +436,9 @@ export function CatalogImportClient() {
 
             <div className="matrix-reconciliation-totals" aria-label="Alcance real del lote">
               <span><strong>{photos.length}</strong> fotos recibidas</span>
-              <span><strong>{reconciliation.selectedRowNumbers.length}</strong> productos con foto</span>
+              <span><strong>{reconciliation.assignedImages}</strong> productos con foto</span>
               <span className={reconciliation.missingRows.length ? "has-missing" : ""}><strong>{reconciliation.missingRows.length}</strong> productos sin foto</span>
-              {reconciliation.additionalImages ? (
-                <p>{reconciliation.additionalImages} {reconciliation.additionalImages === 1 ? "foto adicional está vinculada" : "fotos adicionales están vinculadas"} como segunda o tercera vista de un producto.</p>
-              ) : null}
+              <p>Cada foto se guarda como un producto independiente.</p>
             </div>
 
             <div className="matrix-match-list">
@@ -457,7 +462,12 @@ export function CatalogImportClient() {
                         <span>Asignar a</span>
                         <select value={decision.rowNumber ?? ""} disabled={phase !== "idle"} onChange={(event) => chooseRow(match.imageName, event.target.value ? Number(event.target.value) : null)}>
                           <option value="">Seleccionar producto…</option>
-                          {allValidRows.map((row) => <option key={row.rowNumber} value={row.rowNumber}>Fila {row.rowNumber} · {row.label}</option>)}
+                          {allValidRows.map((row) => {
+                            const usedByAnotherPhoto = Object.entries(decisions).some(([decisionKey, current]) => (
+                              decisionKey !== key && !current.ignored && current.rowNumber === row.rowNumber
+                            ));
+                            return <option disabled={usedByAnotherPhoto} key={row.rowNumber} value={row.rowNumber}>Fila {row.rowNumber} · {row.label}{usedByAnotherPhoto ? " · ya asignada" : ""}</option>;
+                          })}
                         </select>
                       </label>
                       <label className="matrix-item-category">
@@ -562,7 +572,7 @@ export function CatalogImportClient() {
               <legend>Hay {preview.duplicateCount} productos con el mismo nombre y marca</legend>
               <label><input type="radio" name="matrix-duplicate-mode" checked={duplicateMode === "skip"} onChange={() => changeDuplicateMode("skip")} /><span><strong>Importar solo nuevos — recomendado</strong><small>Omite lo que ya existe. No borra ni modifica productos anteriores.</small></span></label>
               <label><input type="radio" name="matrix-duplicate-mode" checked={duplicateMode === "create"} onChange={() => changeDuplicateMode("create")} /><span><strong>Crear copias nuevas</strong><small>Conserva el anterior y crea otro producto.</small></span></label>
-              <label><input type="radio" name="matrix-duplicate-mode" checked={duplicateMode === "update"} onChange={() => changeDuplicateMode("update")} /><span><strong>Actualizar existentes</strong><small>Actualiza datos y agrega las nuevas imágenes.</small></span></label>
+              <label><input type="radio" name="matrix-duplicate-mode" checked={duplicateMode === "update"} onChange={() => changeDuplicateMode("update")} /><span><strong>Actualizar existentes</strong><small>Reemplaza datos y fotografía con la fila confirmada.</small></span></label>
             </fieldset>
           ) : null}
 
@@ -572,7 +582,6 @@ export function CatalogImportClient() {
               <span>
                 {reconciliation.pendingImages ? `${reconciliation.pendingImages} imágenes pendientes. ` : ""}
                 {reconciliation.missingRows.length ? `${reconciliation.missingRows.length} productos sin foto se omitirán en este lote. ` : ""}
-                {reconciliation.additionalImages ? `${reconciliation.additionalImages} fotos son vistas adicionales, no productos separados. ` : ""}
                 {!reconciliation.ready && !reconciliation.pendingImages && !reconciliation.selectedRowNumbers.length ? "Asigna al menos una fotografía a un producto. " : ""}
                 {reconciliation.ignoredImages ? `${reconciliation.ignoredImages} imágenes ignoradas.` : ""}
               </span>
@@ -587,7 +596,7 @@ export function CatalogImportClient() {
       {summary ? (
         <section className="matrix-import-result" aria-live="polite">
           <span>Importación terminada</span><h2>{summary.importedCount} productos sincronizados</h2>
-          <p>{summary.uploadedImageCount} fotos vinculadas a {summary.importedCount} productos{summary.additionalImageCount ? `; ${summary.additionalImageCount} son vistas adicionales` : ""}. {summary.missingPhotoCount} productos quedaron pendientes por falta de foto.</p>
+          <p>{summary.uploadedImageCount} fotos vinculadas a {summary.importedCount} productos independientes. {summary.missingPhotoCount} productos quedaron pendientes por falta de foto.</p>
           <p>{summary.createdCount} creados, {summary.updatedCount} actualizados, {summary.skippedExistingCount} existentes omitidos y {summary.skippedRowCount} filas fuera de este lote.</p>
           {summary.errors.length ? <details><summary>Ver filas bloqueadas</summary><ul>{summary.errors.map((item) => <li key={item.rowNumber}>Fila {item.rowNumber}: {item.errors.join(" ")}</li>)}</ul></details> : null}
           <div><a className="dashboard-button is-primary" href="/dashboard">Ver productos</a><button className="dashboard-button is-secondary" type="button" onClick={clearAll}>Importar otro lote</button></div>

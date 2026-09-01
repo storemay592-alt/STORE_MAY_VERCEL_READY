@@ -198,7 +198,6 @@ export async function updateDashboardProductAction(
       ...parsed.data,
       article: current.article || parsed.data.type,
       model: current.model || parsed.data.name,
-      brandPrice: current.brandPrice,
       imageUrls,
       whatsappNumber: current.whatsappNumber || publicWhatsappNumber()
     });
