@@ -36,7 +36,7 @@ const matrixColumnLabels: Record<(typeof catalogMatrixColumns)[number], string> 
   COLOR: "Color",
   TALLA: "Talla",
   "V. MARCA": "V. marca",
-  "P.ECUA": "P. Ecuador",
+  "P.ECUA": "P. Store MAY",
   ESTADO: "Stock / vendido"
 };
 

@@ -191,7 +191,7 @@ export function DashboardProductForm({
             {error("brandPrice") ? <small className="dashboard-field-error">{error("brandPrice")}</small> : null}
           </label>
           <label className="dashboard-field">
-            <span>P. Ecuador (Precio Store MAY) *</span>
+            <span>P. Store MAY *</span>
             <div className="dashboard-money-input"><b>$</b><input name="price" type="number" min="0" step="0.01" defaultValue={product?.price} placeholder="0.00" required /></div>
             {error("price") ? <small className="dashboard-field-error">{error("price")}</small> : null}
           </label>

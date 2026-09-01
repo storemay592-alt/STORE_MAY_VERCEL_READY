@@ -65,7 +65,7 @@ export default async function DashboardPage({
                 <code>{product.code}</code>
                 <div className="dashboard-price">
                   <span><small>P. Marca</small>{product.brandPrice === null ? "Sin definir" : <del>{money.format(product.brandPrice)}</del>}</span>
-                  <strong><small>P. Ecuador · Precio Store MAY</small>{money.format(product.price)}</strong>
+                  <strong><small>P. Store MAY</small>{money.format(product.price)}</strong>
                 </div>
                 <form className="dashboard-stock-toggle" action={setStatus} aria-label={`Estado de inventario de ${product.name}`}>
                   <button className={product.status === "disponible" ? "is-active is-stock" : ""} name="status" value="disponible" type="submit">Stock</button>
