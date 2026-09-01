@@ -51,7 +51,7 @@ export default async function DashboardPage({
       {products.length ? (
         <section className="dashboard-products" aria-label="Lista de productos">
           <div className="dashboard-products-head" aria-hidden="true">
-            <span>Producto</span><span>Código</span><span>Precio</span><span>Estado</span><span>Acciones</span>
+            <span>Producto</span><span>Código</span><span>Precios</span><span>Estado</span><span>Acciones</span>
           </div>
           {products.map((product) => {
             const remove = deleteDashboardProductAction.bind(null, product.id);
@@ -63,7 +63,10 @@ export default async function DashboardPage({
                   <div><strong>{product.name}</strong><span>{product.brand} · {product.category}</span></div>
                 </div>
                 <code>{product.code}</code>
-                <strong className="dashboard-price">{money.format(product.price)}</strong>
+                <div className="dashboard-price">
+                  <span><small>P. Marca</small>{product.brandPrice === null ? "Sin definir" : <del>{money.format(product.brandPrice)}</del>}</span>
+                  <strong><small>P. Ecuador · Precio Store MAY</small>{money.format(product.price)}</strong>
+                </div>
                 <form className="dashboard-stock-toggle" action={setStatus} aria-label={`Estado de inventario de ${product.name}`}>
                   <button className={product.status === "disponible" ? "is-active is-stock" : ""} name="status" value="disponible" type="submit">Stock</button>
                   <button className={product.status === "agotado" ? "is-active is-sold" : ""} name="status" value="agotado" type="submit">Sold</button>

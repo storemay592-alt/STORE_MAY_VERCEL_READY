@@ -154,7 +154,12 @@
 .dashboard-product-identity strong { overflow: hidden; font-family: var(--jost), sans-serif; font-size: 1rem; font-weight: 550; text-overflow: ellipsis; white-space: nowrap; }
 .dashboard-product-identity span { color: var(--dash-muted); font-size: 0.65rem; }
 .dashboard-product-row code { font-family: ui-monospace, Consolas, monospace; font-size: 0.7rem; }
-.dashboard-price { font-size: 0.82rem; }
+.dashboard-price { display: grid; gap: 6px; font-size: 0.72rem; }
+.dashboard-price > span,
+.dashboard-price > strong { display: grid; gap: 2px; }
+.dashboard-price small { color: var(--dash-muted); font-size: 0.48rem; font-weight: 750; letter-spacing: 0.08em; text-transform: uppercase; }
+.dashboard-price del { color: var(--dash-muted); text-decoration-color: var(--dash-danger); text-decoration-thickness: 1px; }
+.dashboard-price > strong { color: var(--dash-ink); font-size: 0.82rem; }
 .dashboard-status { width: max-content; padding: 7px 9px; border: 1px solid currentColor; border-radius: 999px; font-size: 0.54rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
 .dashboard-status.is-disponible { color: var(--dash-success); }
 .dashboard-status.is-agotado { color: var(--dash-danger); }
