@@ -21,6 +21,11 @@ type RowClassification = {
   category: (typeof productCategories)[number];
   gender: (typeof productGenders)[number];
 };
+type InventorySnapshot = {
+  itemCount: number;
+  lastModifiedIso: string | null;
+  lastModifiedLabel: string;
+};
 
 function genderForCategory(
   category: RowClassification["category"],
@@ -60,7 +65,7 @@ function mergeImageFiles(current: File[], incoming: File[]) {
   return [...byName.values()].slice(0, maximumCatalogMatrixImages);
 }
 
-export function CatalogImportClient() {
+export function CatalogImportClient({ inventorySnapshot }: { inventorySnapshot: InventorySnapshot }) {
   const [spreadsheet, setSpreadsheet] = useState<File | null>(null);
   const [photos, setPhotos] = useState<File[]>([]);
   const [preview, setPreview] = useState<CatalogMatrixPreview | null>(null);
@@ -76,6 +81,8 @@ export function CatalogImportClient() {
   const [summary, setSummary] = useState<CatalogMatrixSummary | null>(null);
   const [uploadedAssets, setUploadedAssets] = useState<Record<string, UploadedProductImageReference>>({});
   const [dragActive, setDragActive] = useState(false);
+  const [inventoryDownload, setInventoryDownload] = useState<"idle" | "downloading" | "success" | "error">("idle");
+  const [inventoryDownloadMessage, setInventoryDownloadMessage] = useState("");
   const spreadsheetInput = useRef<HTMLInputElement>(null);
   const imageInput = useRef<HTMLInputElement>(null);
 
@@ -134,6 +141,47 @@ export function CatalogImportClient() {
   function addPhotos(files: File[]) {
     setPhotos((current) => mergeImageFiles(current, files));
     resetAnalysis();
+  }
+
+  async function downloadInventory() {
+    setInventoryDownload("downloading");
+    setInventoryDownloadMessage("Preparando el inventario actual…");
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), 30_000);
+
+    try {
+      const response = await fetch("/api/dashboard/export-inventory", {
+        credentials: "same-origin",
+        signal: controller.signal
+      });
+      if (!response.ok) {
+        const error = await response.json().catch(() => null) as { message?: string } | null;
+        throw new Error(error?.message ?? "No se pudo preparar el inventario.");
+      }
+
+      const blob = await response.blob();
+      const disposition = response.headers.get("content-disposition") ?? "";
+      const filename = disposition.match(/filename="?([^";]+)"?/i)?.[1] ?? "inventario-store-may.xlsx";
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.setTimeout(() => URL.revokeObjectURL(url), 1_000);
+      setInventoryDownload("success");
+      setInventoryDownloadMessage(`Inventario descargado. Última modificación: ${inventorySnapshot.lastModifiedLabel}.`);
+    } catch (error) {
+      setInventoryDownload("error");
+      setInventoryDownloadMessage(
+        error instanceof DOMException && error.name === "AbortError"
+          ? "La descarga tardó demasiado. Inténtalo nuevamente."
+          : error instanceof Error ? error.message : "No se pudo descargar el inventario."
+      );
+    } finally {
+      window.clearTimeout(timeout);
+    }
   }
 
   async function analyze(event: FormEvent) {
@@ -358,7 +406,31 @@ export function CatalogImportClient() {
             <p className="matrix-kicker">Matriz de productos</p>
             <h2 id="matrix-file-heading">Carga el Excel</h2>
             <p>Acepta matrices ARTICULO/MODELO y también tu formato MODELO/MATERIAL. El archivo se procesa de forma privada en el servidor.</p>
-            <a className="dashboard-button is-secondary" href="/plantillas/plantilla-store-may.xlsx" download>Descargar plantilla</a>
+            <div className="matrix-download-actions" aria-label="Descargas de inventario">
+              <a className="dashboard-button is-secondary" href="/plantillas/plantilla-store-may.xlsx" download>Plantilla vacía</a>
+              <button
+                className="dashboard-button is-primary"
+                type="button"
+                disabled={inventoryDownload === "downloading"}
+                onClick={downloadInventory}
+              >
+                {inventoryDownload === "downloading" ? "Preparando…" : "Bajar inventario"}
+              </button>
+            </div>
+            <aside
+              className={`matrix-inventory-notice ${inventoryDownload === "error" ? "has-error" : ""}`}
+              role={inventoryDownload === "error" ? "alert" : "status"}
+              aria-live="polite"
+            >
+              <span>Inventario actual</span>
+              <strong>{inventorySnapshot.itemCount} productos listos para descargar</strong>
+              <p>
+                Última modificación: {inventorySnapshot.lastModifiedIso
+                  ? <time dateTime={inventorySnapshot.lastModifiedIso}>{inventorySnapshot.lastModifiedLabel}</time>
+                  : inventorySnapshot.lastModifiedLabel}
+              </p>
+              {inventoryDownloadMessage ? <p className="matrix-inventory-feedback">{inventoryDownloadMessage}</p> : null}
+            </aside>
             <label className={`matrix-file-input ${spreadsheet ? "has-file" : ""}`}>
               <span>{spreadsheet ? "Matriz seleccionada" : "Seleccionar .xlsx o .csv"}</span>
               <strong>{spreadsheet?.name ?? "Ningún archivo"}</strong>

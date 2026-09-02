@@ -481,6 +481,23 @@
 .matrix-import-result h2 { margin: 0; font-family: var(--jost), sans-serif; font-weight: 480; letter-spacing: -.035em; }
 .matrix-intake-rail h2 { font-size: clamp(1.45rem, 2.3vw, 2.25rem); line-height: 1.04; }
 .matrix-intake-rail p:not(.matrix-kicker) { margin: -4px 0 2px; color: var(--dash-muted); font-size: .68rem; line-height: 1.65; }
+.matrix-download-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.matrix-download-actions .dashboard-button { min-width: 154px; }
+.matrix-inventory-notice {
+  display: grid;
+  gap: 5px;
+  padding: 14px 16px;
+  border: 1px solid rgba(47, 110, 74, .32);
+  background: #edf4f0;
+}
+.matrix-inventory-notice > span { color: var(--dash-success); font-size: .54rem; font-weight: 800; letter-spacing: .11em; text-transform: uppercase; }
+.matrix-inventory-notice > strong { font-family: var(--jost), sans-serif; font-size: .86rem; font-weight: 560; }
+.matrix-inventory-notice > p { margin: 0 !important; color: var(--dash-muted); font-size: .59rem !important; }
+.matrix-inventory-notice time { color: var(--dash-ink); font-weight: 700; }
+.matrix-inventory-notice.has-error { border-color: rgba(139, 52, 52, .34); background: #f9eeee; }
+.matrix-inventory-notice.has-error > span,
+.matrix-inventory-notice.has-error .matrix-inventory-feedback { color: var(--dash-danger); }
+.matrix-inventory-feedback { padding-top: 5px; border-top: 1px solid rgba(47, 110, 74, .18); color: var(--dash-success) !important; font-weight: 700; }
 .matrix-file-input,
 .matrix-dropzone {
   position: relative;
@@ -708,6 +725,8 @@
 @media (max-width: 640px) {
   .matrix-intake-rail { grid-template-columns: 1fr; padding: 22px 16px; }
   .matrix-step-number { display: none; }
+  .matrix-download-actions { display: grid; grid-template-columns: 1fr; }
+  .matrix-download-actions .dashboard-button { width: 100%; }
   .matrix-batch-settings { grid-template-columns: 1fr; padding: 20px 16px; }
   .matrix-batch-settings > div:first-child { grid-column: auto; }
   .matrix-batch-settings .dashboard-button { width: 100%; }
