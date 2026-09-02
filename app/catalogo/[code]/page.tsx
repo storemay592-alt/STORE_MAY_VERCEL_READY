@@ -7,6 +7,7 @@ import { JsonLd } from "@/components/JsonLd";
 import { PremiumHeader } from "@/components/PremiumHeader";
 import { getCatalogProductByCode } from "@/lib/catalog-products";
 import { absoluteUrl } from "@/lib/site";
+import { storeWhatsappHref } from "@/lib/store-contact";
 import "../catalogo.css";
 
 export const dynamic = "force-dynamic";
@@ -37,9 +38,7 @@ export default async function CatalogProductPage({
   const rawImage = (await searchParams).imagen;
   const requestedImage = Number(Array.isArray(rawImage) ? rawImage[0] : rawImage);
   const initialImageIndex = Number.isInteger(requestedImage) ? requestedImage - 1 : 0;
-  const message = encodeURIComponent(`Hola, quiero consultar por ${product.name} (código ${product.code})`);
-  const number = (product.whatsappNumber || process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "").replace(/\D/g, "");
-  const whatsappHref = number ? `https://wa.me/${number}?text=${message}` : `https://api.whatsapp.com/send?text=${message}`;
+  const whatsappHref = storeWhatsappHref(`Hola, quiero consultar por ${product.name} (código ${product.code})`);
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "Product",

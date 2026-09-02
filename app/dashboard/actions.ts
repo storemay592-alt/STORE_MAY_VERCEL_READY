@@ -19,6 +19,7 @@ import type { UploadedProductImageReference } from "@/lib/catalog-import-contrac
 import { recordAdminSecurityEvent } from "@/lib/security/admin-audit";
 import { consumeRateLimit } from "@/lib/security/rate-limit";
 import { assertTrustedActionOrigin, getRequestIdentity } from "@/lib/security/request";
+import { storeWhatsappNumber } from "@/lib/store-contact";
 
 export async function dashboardLoginAction(
   _: DashboardLoginState,
@@ -82,7 +83,7 @@ export async function dashboardLogoutAction() {
 }
 
 function publicWhatsappNumber() {
-  return process.env.NEXT_PUBLIC_WHATSAPP_NUMBER?.replace(/\D/g, "") ?? "";
+  return storeWhatsappNumber;
 }
 
 function safeMessage(error: unknown) {

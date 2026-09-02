@@ -6,6 +6,7 @@ import { DeferredSplineFrame } from "@/components/DeferredSplineFrame";
 import { PremiumHeader } from "@/components/PremiumHeader";
 import { faqs } from "@/data/faqs";
 import { categories } from "@/lib/catalog";
+import { storeWhatsappHref } from "@/lib/store-contact";
 
 const brandLogos = [
   {
@@ -112,9 +113,7 @@ const testimonialFrames = [
   }
 ] as const;
 
-const storeWhatsappHref = `https://api.whatsapp.com/send?text=${encodeURIComponent(
-  "Hola Store MAY, quiero recibir atención personalizada."
-)}`;
+const storeWhatsappUrl = storeWhatsappHref("Hola Store MAY, quiero recibir atención personalizada.");
 
 export default function StoreExperience() {
   const [openFaq, setOpenFaq] = useState(0);
@@ -405,7 +404,7 @@ export default function StoreExperience() {
           </div>
           <a
             className="advisor-whatsapp-button"
-            href={storeWhatsappHref}
+            href={storeWhatsappUrl}
             target="_blank"
             rel="noreferrer"
             aria-label="Contactar a Store MAY por WhatsApp"

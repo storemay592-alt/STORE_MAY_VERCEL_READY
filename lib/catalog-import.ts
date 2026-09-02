@@ -2,6 +2,7 @@ import "server-only";
 
 import * as XLSX from "xlsx";
 import { getDatabase } from "@/lib/db";
+import { storeWhatsappNumber } from "@/lib/store-contact";
 import {
   catalogImportColumns,
   type CatalogImportColumn,
@@ -371,7 +372,7 @@ export async function previewCatalogImport(spreadsheet: File, selectedPhotoNames
 }
 
 function publicWhatsappNumber() {
-  return process.env.NEXT_PUBLIC_WHATSAPP_NUMBER?.replace(/\D/g, "") ?? "";
+  return storeWhatsappNumber;
 }
 
 export async function confirmCatalogImport(

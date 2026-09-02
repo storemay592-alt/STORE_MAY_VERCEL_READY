@@ -3,6 +3,7 @@ import "server-only";
 import { fuzzy } from "fast-fuzzy";
 import * as XLSX from "xlsx";
 import { getDatabase } from "@/lib/db";
+import { storeWhatsappNumber } from "@/lib/store-contact";
 import {
   catalogMatrixColumns,
   maximumCatalogMatrixImages,
@@ -444,7 +445,7 @@ export async function previewCatalogMatrix(spreadsheet: File, imageNames: string
 }
 
 function publicWhatsappNumber() {
-  return process.env.NEXT_PUBLIC_WHATSAPP_NUMBER?.replace(/\D/g, "") ?? "";
+  return storeWhatsappNumber;
 }
 
 function assertCategoryAndGender(category: string, gender: string) {
