@@ -26,13 +26,13 @@
     "@neondatabase/serverless": "1.1.0",
     "bcryptjs": "3.0.3",
     "fast-fuzzy": "1.12.0",
-    "jose": "6.2.10",
-    "next": "16.3.2",
+    "jose": "6.2.11",
+    "next": "16.3.4",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "server-only": "0.0.1",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz",
-    "zod": "4.4.3"
+    "zod": "4.5.4"
   },
   "devDependencies": {
     "@types/node": "26.2.0",
